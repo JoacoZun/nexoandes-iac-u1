@@ -14,3 +14,26 @@ crash.*.log
 .env.*
 *.pem
 *.key
+
+# Herramientas y evidencia local; conservar .terraform.lock.hcl
+.tools/
+.venv/
+__pycache__/
+*.pyc
+artifacts/
+dist/
+*.zip
+*.tfplan.*
+*.plan
+plan.json
+backend.hcl
+backend.tf
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+credentials
+*.pfx
+*.p12
+.aws/
+*.log
