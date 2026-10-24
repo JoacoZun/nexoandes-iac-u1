@@ -1,35 +1,61 @@
-# Git y pull request — preparado, no ejecutado
+# Git y Draft Pull Request existente
 
-Base auditada: main y feature/fase1-iac en `7869232`; rama activa feature/fase1-iac.
-README/.gitignore versionados; 14 archivos Terraform vacíos sin seguimiento antes
-de implementar. No se ejecutaron commit/push/merge ni creación de PR.
+Auditoría de solo lectura del 24-10-2026: `feature/fase1-iac` en
+`e7f6025bc8fd7e221942c19d3fd0eb579809410b`, coincide con la cabeza remota de
+[Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1), abierta hacia
+`main` (`78692328cfa0536fd80334168a27c5fed9790eef`). Creada a las 12:26:12,
+America/Santiago (UTC−03:00). API de reviews: **0 revisiones registradas**.
+La sesión comenzó con working tree limpio; los cambios de preparación de lista 8
+son locales y todavía no forman parte de la PR ni de sus checks aprobados.
 
-Revisar primero `git status --short --branch`, `git diff --check` y diffs de cada
-grupo. Los archivos nuevos se revisan con `git add -N <ruta>` si se desea verlos con
-git diff (modifica solo índice; aquí no se ejecutó). No usar `git add .` sin inspección.
+No crear una segunda PR, no cambiar a Ready, aprobar, cerrar ni fusionar desde
+esta preparación. `docs/PR_BODY.md` es únicamente una descripción propuesta local;
+no se modificó la descripción remota. La revisión automática no es aprobación humana.
 
-Comandos propuestos para commits atómicos, ejecutar solo con autorización del usuario:
+## Historial real y comparación
+
+| Commit | Cambio |
+|---|---|
+| `86dc894e8c257649a07868f733d606c0f5f642cf` | feat(iac): infraestructura modular |
+| `b5494aa250a884059bfc5472f396e7837b729086` | test(iac): pruebas y controles |
+| `3f274f0f54456dc4390cf2dd3c9de916eb504be8` | ci: validación y despliegue desactivado |
+| `1c0966c31ab19b31f6f4a1b71516eaae7da9039f` | docs: arquitectura y evidencias |
+| `e7f6025bc8fd7e221942c19d3fd0eb579809410b` | fix(ci): checksum Linux AWS Provider |
+
+La comparación `git diff main...HEAD --stat` mostró 46 archivos, 1902 inserciones
+y 25 eliminaciones en la implementación publicada. La API de archivos PR corroboró
+46 archivos. Es una comparación de commits; no incluye los nuevos cambios locales.
+Consultar [comparación actual](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1/files).
+
+Comandos de consulta que no alteran GitHub:
 
 ```powershell
-git switch feature/fase1-iac
-git add main.tf variables.tf outputs.tf versions.tf providers.tf modules .terraform.lock.hcl templates/README.md .gitignore .gitattributes
-git commit -m "feat: implementa arquitectura modular AWS de fase 1"
-git add tests .tflint.hcl .checkov.yml requirements-ci.txt scripts/check_repository.py scripts/Invoke-Checks.ps1
-git commit -m "test: incorpora aserciones mock y controles de calidad IaC"
-git add .github ci
-git commit -m "ci: prepara controles sin AWS y candidato de despliegue protegido"
-git add README.md docs scripts/Verify-Deployment.ps1 scripts/Verify-Cleanup.ps1 scripts/Build-Submission.ps1
-git commit -m "docs: documenta operacion evidencias y entrega verificable"
-git push -u origin feature/fase1-iac
-gh pr create --base main --head feature/fase1-iac --title "feat: infraestructura modular NexoAndes fase 1" --body-file docs/PR_BODY.md
+git status --short --branch
+git log main..HEAD --oneline
+git diff main...HEAD --stat
+git diff --stat
+git diff --check
 ```
 
-Si gh no está disponible, abrir compare y seleccionar main como base:
-https://github.com/JoacoZun/nexoandes-iac-u1/compare/main...feature/fase1-iac
-Copiar `docs/PR_BODY.md`, solicitar revisión humana real y registrar PR/comentarios/SHA.
-No inventar revisor ni aprobación. No fusionar hasta completar guía y requisitos.
+## Revisión técnica antes de autorizar integración
+
+1. Cotejar el SHA de la PR y el de todos los checks; repetir CI cuando se publiquen
+   los cambios locales de lista 8. Un check de e7f6025 no acredita un diff posterior.
+2. Revisar root default 8, subnet 172.16.8.0/24 y parametrización de network con
+   otro X; nombres y tags deben compartir student_id y ListNumber.
+3. Cotejar VPC/ruta/asociación, única entrada TCP/80, ausencia de SSH/key pair,
+   egreso HTTP/HTTPS, IMDSv2, cifrado y eliminación del volumen raíz.
+4. Verificar contrato, origen y hash de la plantilla docente; no aprobar una fixture
+   de mocks como portal. Confirmar AMI/SO/tipo/región con la guía.
+5. Revisar lock sin hashes manuales ficticios: SHA256 oficiales Linux/Windows y
+   `init -lockfile=readonly`. Revisar pruebas negativas y parsers en jobs separados.
+6. Confirmar CI sin credenciales/plan/apply, candidato aún disabled y adaptadores
+   bloqueados hasta guía. Revisar plan protegido, gate real, backend/locking y roles.
+7. Registrar comentarios humanos, correcciones, fecha y resolución. Hoy no hay
+   aprobación humana; mantener Draft mientras falten materiales y revisión.
 
 Si el entorno sandbox detecta dubious ownership, usar por comando
 `git -c safe.directory=C:/Users/il_fl/Desktop/nexoandes-iac-u1 <subcomando>`.
-No se cambió configuración global de Git. Los commits anteriores son una propuesta
-de agrupación; revisar dependencias y resultados finales antes de ejecutarlos.
+No se cambió configuración global de Git. La primera auditoría encontró 14 .tf
+vacíos y ambas ramas en 7869232; ese estado es histórico, ya superado por los cinco
+commits anteriores. En esta sesión no se ejecutó commit/push/merge ni escritura GitHub.

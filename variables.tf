@@ -8,8 +8,9 @@ variable "aws_region" {
 }
 
 variable "list_number" {
-  description = "Número de lista X; determina exactamente 172.16.X.0/24."
+  description = "Número de lista X; determina 172.16.X.0/24. Estudiante actual: 8; se puede sobrescribir."
   type        = number
+  default     = 8
   validation {
     condition     = var.list_number >= 0 && var.list_number <= 255 && floor(var.list_number) == var.list_number
     error_message = "X debe ser un entero entre 0 y 255; confirmar el número con el docente."

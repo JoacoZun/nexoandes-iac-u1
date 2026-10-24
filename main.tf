@@ -5,6 +5,7 @@ locals {
     Phase       = "fase1"
     Environment = var.environment
     Student     = var.student_id
+    ListNumber  = tostring(var.list_number)
     ManagedBy   = "Terraform"
   }
   # try permite validate sin plantilla; la precondición EC2 bloquea cualquier plan real.

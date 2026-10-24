@@ -4,7 +4,7 @@ Evaluación Sumativa U1 · Automatización de Infraestructura con IaC (IC106TICL
 
 Repositorio individual: https://github.com/JoacoZun/nexoandes-iac-u1
 
-Implementación modular para laboratorio AWS. **No hay despliegue real, portal comprobado, PR ni aprobación registrados.** No es posible declarar 100/100 sin esas evidencias. Consulte [resultados reales](docs/VALIDATION.md), [matriz CE1–CE8](docs/RUBRIC.md) y [plan de evidencias](docs/EVIDENCE.md).
+Implementación modular para laboratorio AWS. Hay cinco commits de implementación, [Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1) y cuatro checks exitosos en dos ejecuciones CI de `e7f6025`. No hay revisión humana registrada, despliegue AWS ni portal comprobado. Los cambios locales para lista 8 aún requieren commit y nueva CI, que no se ejecutan automáticamente desde esta preparación. Consulte [resultados reales](docs/VALIDATION.md), [matriz CE1–CE8](docs/RUBRIC.md) y [evidencias](docs/EVIDENCE.md).
 
 ## Arquitectura y estructura
 
@@ -21,7 +21,9 @@ flowchart LR
     SEC --> COMP
 ```
 
-El diagrama representa conectividad lógica; una tabla de rutas no filtra tráfico. VPC fija `172.16.0.0/16`; `cidrsubnet(..., 8, X)` garantiza `172.16.X.0/24`. Se valida X entero en [0,255]; el número real sigue pendiente.
+El diagrama representa conectividad lógica; una tabla de rutas no filtra tráfico. VPC fija `172.16.0.0/16`; `cidrsubnet(..., 8, X)` garantiza `172.16.X.0/24`. El número de lista confirmado es **8**: el root ofrece `list_number = 8` por defecto y genera **172.16.8.0/24**. X se puede sobrescribir y se valida como entero en [0,255]; el módulo network no tiene un valor fijo para el estudiante 8. Las pruebas conservan el caso reutilizable X=255.
+
+`student_id` sigue siendo un input obligatorio, sin inventar nombre ni identidad. Un único valor alimenta el prefijo de nombres y el tag `Student`; los tags comunes son `Project`, `Phase`, `Environment`, `Student`, `ListNumber` y `ManagedBy`. `ListNumber` se deriva del input, no de un literal en los módulos.
 
 | Ruta | Responsabilidad |
 |---|---|
@@ -73,14 +75,14 @@ Checkov ejecuta cinco políticas seleccionadas: cifrado EBS, descripción SG, au
 
 ## Configuración pendiente antes del plan real
 
-Confirmar número de lista, identificador/nombre del estudiante, región, tipo EC2 permitido, AMI/SO y plantilla original. También guía de CI/CD, autenticación temporal, cuenta autorizada y backend cifrado con locking.
+Lista 8 confirmada. Faltan el identificador académico/nombre para la entrega y dos materiales del docente: **user_data_v1.sh.tpl** y **guía técnica vigente de despliegue**. La guía debe confirmar región, tipo EC2, compatibilidad AMI/SO, autenticación, state/backend/locking, gate y restricciones del laboratorio. AWS Academy Learner Lab [193444] es solo una posibilidad, no el entorno autorizado confirmado. También debe cotejarse la plantilla oficial de la Ficha antes del PDF.
 
-Crear localmente `lab.auto.tfvars` (ignorado) con valores reales autorizados:
+`terraform.tfvars.example` contiene solo la lista 8 y la ruta esperada de la plantilla, sin región/tipo/credenciales inventados. Cuando lleguen los materiales, copiarlo a `lab.auto.tfvars` (ignorado) **solo si ese archivo no existe** y completar los campos requeridos:
 
 ```hcl
 # Completar sin copiar marcadores como valores:
 # aws_region = ...
-# list_number = ...
+list_number = 8
 # student_id = ...
 # instance_type = ...
 # ami_id = ... # opcional; null consulta AL2023
@@ -89,6 +91,8 @@ portal_parameters       = {} # adaptar al contrato oficial
 ```
 
 No ejecutar plan real con archivo incompleto. Plantilla ausente, vacía o con error de renderizado bloquea EC2. Autenticidad y funcionamiento se revisan aparte; ver [contrato](templates/README.md).
+
+El cierre ordenado está en [OPERATIONS.md](docs/OPERATIONS.md): plantilla y variables → autenticación/backend autorizados → revisión/CI del SHA final → activación aprobada → plan protegido y gate real → apply desde pipeline → AWS/HTTP y plan posterior → limpieza autorizada → ZIP/PDF inspeccionados. No ejecutar todavía esas operaciones AWS.
 
 No hay backend ficticio. El backend local actual sirve solo para validar; no usarlo en runners efímeros. `init -backend=false` no configura state remoto. Los adaptadores `ci/` deben incorporar autenticación/backend autorizados antes de activar despliegue. Mantener state, planes y variables privadas fuera de Git, incluso después de destroy.
 

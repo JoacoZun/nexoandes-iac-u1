@@ -12,9 +12,10 @@ $selected = @($files | Where-Object {
     $path = $_
     $parts = $path -split '/'
     ($parts.Count -eq 1 -or $parts[0] -in @('modules','templates','tests','scripts','docs','ci','.github')) -and
-    ([IO.Path]::GetExtension($path) -in $allowed -or $path -in @('.gitignore','.gitattributes')) -and
+    ([IO.Path]::GetExtension($path) -in $allowed -or $path -in @('.gitignore','.gitattributes','terraform.tfvars.example')) -and
     $path -notmatch '(^|/)(\.git|\.terraform|\.aws|\.tools|\.venv|__pycache__)(/|$)' -and
-    $path -notmatch '(tfstate|\.tfvars|\.tfplan|credentials|backend\.hcl|backend\.tf|override\.tf|\.pem|\.key|\.env)'
+    ($path -eq 'terraform.tfvars.example' -or
+     $path -notmatch '(tfstate|\.tfvars|\.tfplan|credentials|backend\.hcl|backend\.tf|override\.tf|\.pem|\.key|\.env)')
 })
 if($selected -notcontains '.terraform.lock.hcl'){throw 'Provider lock file missing'}
 if($Preview){ $selected; return }

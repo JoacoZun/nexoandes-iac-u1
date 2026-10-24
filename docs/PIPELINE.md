@@ -8,6 +8,17 @@ revisable, no una autorización. Adaptar el diseño si la guía requiere otra.
 `deploy.yml.disabled` no es un workflow activo. Además los dos adaptadores `ci/`
 terminan con error explícito. No basta con renombrar el archivo para desplegar.
 
+Estado comprobado al 24-10-2026: CI de e7f6025 pasó para push
+[40106088973](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106088973)
+y PR [40106962247](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106962247),
+con controls y repository-python aprobados en cada ejecución. No se cambian
+triggers ni permisos: contents:read, sin id-token/credenciales ni plan/apply en CI.
+Terraform 1.16.6, provider 6.42.0, acciones por SHA, TFLint/plugin y dependencias
+directas Python están fijados. Las dependencias transitivas pip no son un lock
+hermético. El init Linux readonly pasó en ambos jobs controls; los SHA256 zh de
+Linux/Windows también se cotejaron con el manifiesto oficial de HashiCorp.
+El cambio local lista 8 requiere su propia corrida futura de CI.
+
 Flujo candidato: dispatch desde main → cinco controles → autenticación temporal
 e init con backend aprobado → plan binario y texto del mismo SHA → artefacto
 inmutable de la misma ejecución → environment con required reviewers → verificación
@@ -29,6 +40,12 @@ regenerarlo silenciosamente en apply. Terraform valida linaje/serial del state.
    environment exactos y audience; usar roles separados plan/lectura y apply mínimo.
    No se han inventado roles, cuentas ni políticas IAM funcionales. El permiso
    `id-token: write` del candidato no configura por sí mismo confianza ni credenciales.
+   Un `export` dentro del step que hace source no sobrevive automáticamente a los
+   siguientes steps de Actions. La integración autorizada deberá proporcionar
+   credenciales temporales al job (acción institucional o mecanismo aprobado para
+   GITHUB_ENV, sin secretos en logs), además de estar disponibles al init del mismo
+   step. Autenticar cada job por separado; no transferir credenciales en el artefacto
+   del plan. Nada de esto se configura definitivamente antes de recibir la guía.
 4. Reemplazar `ci/institutional-init.sh`: materializar backend autorizado e inicializar
    **el mismo** estado remoto, cifrado y con locking en plan/apply. Usar
    `-lockfile=readonly`, restringir acceso al state y verificar cuenta/identidad mediante
@@ -53,6 +70,13 @@ regenerarlo silenciosamente en apply. Terraform valida linaje/serial del state.
    mecanismo institucional protegido; nunca subir planes sensibles a un repos público.
 8. Verificar retención, hashes y permiso del almacén; luego renombrar el candidato a
    `.yml` mediante PR revisada. La activación no autoriza por sí sola un dispatch.
+
+La guía debe confirmar además si AWS Academy Learner Lab [193444] es el laboratorio
+válido y si sus restricciones permiten el mecanismo propuesto. No usar ese número
+como account ID/rol AWS ni asumir que permite crear IAM u OIDC. Siguen pendientes
+región, tipo EC2, identidad académica real, cuenta/roles o sesión temporal autorizada,
+ubicación/cifrado del state, locking, gate y privacidad del plan. El candidato sigue
+disabled y los adaptadores siguen fallando explícitamente.
 
 El hash SHA256 esperado pasa por outputs del job plan, separado del archivo descargado;
 el job apply compara hash, commit y antigüedad. El nombre de artefacto incluye run ID

@@ -1,13 +1,17 @@
-## Objetivo y alcance
+## Objetivo y alcance — propuesta local para la PR #1 existente
 
 Convierte la arquitectura Fase 1 de NexoAndes en Terraform modular: VPC
 172.16.0.0/16, subnet 172.16.X.0/24, IGW/ruta pública, SG HTTP sin SSH y EC2 con
-IP pública, IMDSv2, EBS cifrado y bootstrap parametrizado. X/región/tipo/estudiante
-se proporcionan explícitamente; no se despliega con valores asumidos.
+IP pública, IMDSv2, EBS cifrado y bootstrap parametrizado. Lista confirmada: 8,
+subnet 172.16.8.0/24. El root ofrece 8 como default sobrescribible; network sigue
+genérico. Región, tipo e identidad deben completarse con datos reales autorizados.
 
 ## Cambios
 
-- Módulos network/security/compute, inputs validados, outputs/tags y provider lock.
+- Módulos network/security/compute, inputs validados, outputs/tags y provider lock
+  6.42.0 con checksums Windows/Linux contrastados con HashiCorp.
+- Preparación local nueva: default 8, tag ListNumber derivado, prueba root de subnet
+  e identidad y ejemplo público de variables sin secretos, incluido en el ZIP limpio.
 - Integración de plantilla docente con bloqueo si falta o no se puede renderizar.
 - Pruebas con AWS mock, TFLint y Checkov con perfil documentado; CI sin credenciales.
 - Candidato de pipeline desactivado con plan guardado, integridad, caducidad,
@@ -16,14 +20,26 @@ se proporcionan explícitamente; no se despliega con valores asumidos.
 
 ## Validaciones
 
-Ver resultados y límites en `docs/VALIDATION.md`. Son validaciones locales;
-no hay ejecución de GitHub Actions, plan real, apply, HTTP ni destroy acreditados.
-Actualizar aquí el SHA/run ID cuando existan; no atribuir CI remoto a logs locales.
+Base publicada verificada: `e7f6025bc8fd7e221942c19d3fd0eb579809410b`.
+[PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1) abierta y Draft;
+0 revisiones registradas en la consulta del 24-10-2026.
+
+- [Push CI 40106088973](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106088973): success.
+- [PR CI 40106962247](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106962247): success.
+- Cada ejecución tiene controls y repository-python en success: cuatro checks,
+  dos ejecuciones; init/format/validate/mocks/lint/security/policy aprobados en la base.
+
+Los cambios de lista 8 son locales sin commit y aún no están cubiertos por esos
+checks. Repetir CI sobre su futuro SHA antes de revisar integración. Los resultados
+locales y el límite mTLS de Codex están en `docs/VALIDATION.md`.
+No hay plan real, apply, HTTP ni destroy acreditados. Esta propuesta no se envió a GitHub.
 
 ## Riesgos y requisitos pendientes
 
-Faltan número de lista, región/tipo EC2 autorizados, plantilla oficial, guía de
-CI/CD, autenticación y backend. Confirmar compatibilidad AMI/script. HTTP e IPv4
+Faltan user_data_v1.sh.tpl, guía técnica vigente y cotejo de la plantilla de Ficha.
+La guía debe autorizar región/tipo, autenticación, backend/locking, gate y laboratorio;
+Learner Lab [193444] no está confirmado. Completar identidad académica real y
+confirmar compatibilidad AMI/script. HTTP e IPv4
 pública son requisitos y pueden implicar exposición/costo. No activar despliegue
 hasta configurar gate, almacenamiento restringido del plan y adaptadores reales.
 No contiene recursos adicionales de negocio ni autorización para apply/destroy.
@@ -33,3 +49,4 @@ No contiene recursos adicionales de negocio ni autorización para apply/destroy.
 Cotejar arquitectura, tags/validaciones, pruebas negativas, salida HTTP/HTTPS,
 control sin SSH, IMDSv2, protección de state/planes y límites de evidencia.
 Adjuntar observaciones humanas reales y resolución antes de merge.
+Mantener la PR existente en Draft; esta revisión de Codex no es aprobación humana.

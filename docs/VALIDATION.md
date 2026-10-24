@@ -4,11 +4,101 @@ Zona: America/Santiago. Resultados locales; no son ejecuciones de GitHub Actions
 Los registros crudos se mantienen en `artifacts/checks/` (ignorado), sujetos a
 revisión antes de usarlos como evidencia. No contienen resultados AWS fabricados.
 
-## Reauditoría del verificador Python — estado actual
+## Preparación final — estado actual, 24-10-2026
+
+Base auditada: `feature/fase1-iac`, árbol inicialmente limpio, HEAD
+`e7f6025bc8fd7e221942c19d3fd0eb579809410b`, cinco commits sobre `main`
+(`78692328cfa0536fd80334168a27c5fed9790eef`). Estos cambios nuevos son locales,
+sin commit ni publicación. No hubo escrituras GitHub ni llamadas AWS.
+Logs nuevos: `artifacts/predeploy/` (ignorado). Las secciones posteriores son
+históricas y no representan el estado Git/remoto actual.
+
+### Configuración y auditoría
+
+- `variables.tf`: default de lista 8, conservando validación entera 0–255.
+  Network sigue recibiendo el número como input sin default en el módulo.
+- `main.tf`: tag `ListNumber` derivado del input; `Student` y los nombres dependen
+  del identificador académico obligatorio, que no se inventó.
+- `tests/architecture.tftest.hcl`: caso subnet 8 y aserción de identidad/tags.
+  Se conservan ocho runs mock, incluido el caso de frontera 255 en otro módulo.
+- `terraform.tfvars.example`: ejemplo público incompleto deliberadamente, sin región,
+  tipo ni identidad arbitrarios. No se carga automáticamente. El empaquetador admite
+  este ejemplo exacto y sigue excluyendo archivos de variables reales.
+- Auditoría HCL: diez bloques de recursos, exclusivamente network/security/compute;
+  entrada única TCP/80 pública sin SSH, salidas TCP/80 y 443 para bootstrap,
+  EC2 con IP pública, IMDSv2 y EBS cifrado. Composición y dependencias conservadas.
+  Es inspección estática, no un plan AWS. Fuente: `architecture-audit.json`.
+- No se modificaron módulos, lock ni workflows. La plantilla oficial sigue ausente.
+
+### Ejecuciones locales nuevas
+
+| Comando/control | Resultado efectivo |
+|---|---|
+| `terraform fmt -check -recursive` | PASS, exit 0 |
+| `terraform validate -no-color` | BLOQUEADO, exit 1, carga del esquema del provider |
+| `terraform test -no-color` | BLOQUEADO, exit 1: 0 aprobados, 2 fallidos, 6 omitidos por esquema |
+| `cidrsubnet("172.16.0.0/16", 8, 8)` en console aislada sin provider | PASS: `172.16.8.0/24`; verifica cálculo, no despliegue |
+| `.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v` | PASS: 20 tests |
+| `.venv/Scripts/python.exe scripts/check_repository.py` | PASS, exit 0 |
+| TFLint 0.61.0, recursive/max-workers=1/config absoluta y plugin local | PASS, exit 0 |
+| Checkov 3.2.495, perfil existente | PASS: 10 aprobadas, 0 fallidas, 0 omitidas; alcance limitado al perfil |
+| actionlint 1.7.7, CI y candidato disabled, `-shellcheck=` | PASS, exit 0; sin shellcheck externo |
+| Parser PowerShell de scripts | PASS |
+| `Build-Submission.ps1 -Preview` | PASS: 47 archivos, lock y ejemplo incluidos; sin generar ZIP |
+| Patrones dirigidos de secretos | Sin coincidencias; no certifica ausencia absoluta de secretos |
+| Gitignore | State, planes, credenciales, .venv y .tools excluidos; lock y ejemplo no ignorados |
+| `git diff --check` | PASS |
+
+Antes de ejecutar test se inspeccionaron ambos `.tftest.hcl`: usan
+`mock_provider "aws" {}`, sin providers reales ni overrides. El DEBUG confirma
+a las 13:48 UTC−03 el bloqueo local:
+`authentication handshake failed: tls: failed to verify certificate: x509: certificate signed by unknown authority`.
+Fuente: `artifacts/predeploy/provider-debug.log`. No se modificaron certificados,
+TLS ni herramientas globales. Los nuevos asserts de lista 8 requieren una ejecución
+Terraform completa en un entorno funcional. Los anteriores resultados Git Bash
+(validate aprobado, ocho tests aprobados) fueron informados por el usuario y no
+se atribuyen a esta ejecución.
+
+### Evidencia remota comprobada, distinta de los cambios locales
+
+Consulta REST pública de solo lectura: [Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1),
+abierta hacia `main`, head `e7f6025`, creada 24-10-2026 a las 12:26:12 UTC−03,
+**cero reviews registradas**. No se aprobó ni modificó la PR.
+
+- [Run push 40106088973](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106088973): success, iniciado 12:14:48 UTC−03.
+- [Run pull_request 40106962247](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106962247): success, iniciado 12:26:17 UTC−03.
+
+Cada run tiene dos jobs aprobados: cuatro checks en dos ejecuciones sobre el mismo
+HEAD. La API confirma pasos exitosos de init readonly, formato, validate, tests
+mock, lint, seguridad y verificaciones Python. No se descargaron logs autenticados
+ni se atribuyen esos éxitos a los cambios nuevos sin commit. Fuentes crudas:
+`github-readonly.json` y `github-detail.json` en `artifacts/predeploy/`.
+La nueva revisión deberá pasar CI en su SHA final.
+
+Lock AWS 6.42.0 conservado: comparación HTTPS con el [manifiesto oficial](https://releases.hashicorp.com/terraform-provider-aws/6.42.0/terraform-provider-aws_6.42.0_SHA256SUMS)
+confirma las entradas zh para linux_amd64 y windows_amd64:
+
+- Linux: `5bcc36226fa5d8a3c37e41ac8cfd2b1eb73e7ae96f8418f6776dcaa16a987198`.
+- Windows: `7e534c454cdeafe9cc225bea53397883bb96c54da6ea3421fd53dbc9dfc1bb90`.
+
+Esto comprueba correspondencia de hashes publicados; no es una nueva verificación
+de firma. El init Linux readonly ya consta aprobado en CI del HEAD.
+
+### Límites y cierre pendiente
+
+CI sigue sin operaciones AWS; `deploy.yml.disabled` permanece inactivo. La guía
+debe autorizar autenticación, backend/locking, protección del plan y aprobación
+real antes de habilitar el candidato. Academy Learner Lab [193444] no está
+confirmado como entorno autorizado. Faltan plantilla oficial, guía vigente y
+comprobación de la ficha oficial; región, tipo EC2 e identidad siguen pendientes.
+No hay evidencia de plan AWS, apply, HTTP, drift ni destrucción. No se generaron
+ZIP/PDF finales. Ver `RUBRIC.md`, `EVIDENCE.md` y `OPERATIONS.md`.
+
+## Reauditoría del verificador Python — histórico anterior a los commits
 
 Ejecución local del 24-10-2026 en `feature/fase1-iac`, conservando los cambios
-existentes y HEAD `7869232`. Esta sección actualiza el estado; las secciones
-posteriores conservan la auditoría inicial como historial. Logs nuevos en
+existentes y HEAD `7869232`. Esta sección conserva aquella reauditoría y sus
+resultados históricos, anteriores a la preparación final. Logs de esa etapa en
 `artifacts/recheck/`, excluidos de Git. No hubo instalación de Python/paquetes,
 cambios de herramientas globales ni cambios de recursos Terraform.
 

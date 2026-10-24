@@ -1,0 +1,12 @@
+# Ejemplo público SIN secretos. El root también tiene list_number = 8 por defecto.
+# Copiar a lab.auto.tfvars SOLO si no existe y completar con la guía autorizada.
+# Los campos comentados siguen siendo obligatorios; no inventar sus valores.
+list_number = 8
+
+# student_id = ...    # identificador académico real, mismo valor en nombres y tags
+# aws_region = ...    # completar exclusivamente con la región autorizada
+# instance_type = ... # completar según guía; confirmar arquitectura y compatibilidad AMI
+# ami_id = ...        # opcional; null consulta AL2023 x86_64
+
+user_data_template_path = "templates/user_data_v1.sh.tpl" # archivo oficial aún pendiente
+portal_parameters       = {} # completar exclusivamente según la plantilla recibida

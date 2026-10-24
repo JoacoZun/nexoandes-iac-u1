@@ -10,6 +10,29 @@ con sus argumentos. La opción se limita al proceso; no cambiar políticas globa
 En CI Linux se usa pwsh. No confundir la política de scripts con el error mTLS del
 provider documentado en VALIDATION.md: son incidencias diferentes.
 
+## Orden de cierre cuando lleguen los materiales — no ejecutar AWS todavía
+
+Lista confirmada: 8; VPC 172.16.0.0/16 y subnet 172.16.8.0/24. La reutilización
+permanece en los inputs; no editar el CIDR de network para otro estudiante.
+student_id es obligatorio y debe ser el mismo en nombres y tags; no deducir nombre
+legal/RUT a partir del usuario GitHub. Región/tipo de las pruebas son mocks.
+
+| Paso | Acción concreta y condición de avance |
+|---|---|
+| 1. Plantilla oficial | Obtener user_data_v1.sh.tpl del docente, registrar origen/fecha/SHA256 con Get-FileHash, copiar a templates/ conservando lógica. Revisar variables, SO, paquetes, expansiones shell y alcance de red con templates/README.md. No usar tests/fixtures como bootstrap. |
+| 2. Variables | Si no existe lab.auto.tfvars, copiar terraform.tfvars.example; si existe, revisar/completar sin sobrescribirlo. Mantener lista 8; completar student_id real, región/tipo autorizados, AMI/SO compatible y portal_parameters. El archivo incompleto no permite un despliegue. |
+| 3. Autenticación | Confirmar cuenta/laboratorio en la guía, incluido si Learner Lab [193444] está autorizado. Implementar mecanismo temporal aprobado en ci/institutional-auth.sh o acción equivalente; comprobar identidad y permisos sin publicar credenciales. No asumir OIDC ni claves permanentes. |
+| 4. State | Implementar ci/institutional-init.sh con backend cifrado/acceso mínimo/locking autorizado. Usar el mismo estado en plan/apply/limpieza y init readonly; documentar su ciclo de vida, sin inventar buckets, roles ni IDs. |
+| 5. Revisión y activación | Revisar la Draft PR #1 existente, registrar revisión humana y ejecutar CI del SHA final. Integración/activación solo por autorización del responsable y guía. Si se autoriza Actions, configurar environment real, reviewers, ramas, privacidad del plan y adaptar los steps; recién entonces cambiar extensión disabled mediante revisión. |
+| 6. Plan y gate | Dispatch autorizado desde main; generar plan binario/texto del SHA exacto, conservar digest/edad, revisar y aprobar en gate efectivo. Si cambia state/código o caduca, crear plan nuevo y aprobarlo nuevamente. |
+| 7. Apply automatizado | Aplicar desde pipeline únicamente el plan aprobado, con autenticación nueva del job y backend idéntico. Registrar run ID, SHA, identidad saneada, aprobación y resultado. Nunca por push. |
+| 8. Verificación | Ejecutar outputs, consulta AWS del mismo ID/IP, Verify-Deployment.ps1 con región/marcador oficiales y plan posterior. Esperar HTTP 200 con contenido del portal, no solo apply success. Investigar diferencias antes de aceptar. |
+| 9. Limpieza | Obtener autorización de destrucción, revisar plan -destroy con gate, aplicar ese plan y ejecutar Verify-Cleanup.ps1 con inventario previo. Confirmar state vacío y ausencia independiente; no borrar state como sustituto del destroy. |
+| 10. EVA | Completar 6–8 evidencias reales (plan E01–E08), verificar plantilla oficial de Ficha, identidad y formato. Previsualizar ZIP, revisar secretos/lock/ejemplo y recién construir ZIP/PDF finales; inspeccionar ambos. No generar entregables finales mientras falten evidencias. |
+
+Esta tabla es preparación operativa, no autorización para esos pasos. Conservar
+refs de PR/CI base en EVIDENCE.md; la preparación local aún no está en sus checks.
+
 ## Preparación
 
 1. Completar requisitos pendientes del README y revisar plantilla original/SHA256.
