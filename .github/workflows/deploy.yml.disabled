@@ -1,0 +1,102 @@
+# CANDIDATO INERTE: GitHub no ejecuta archivos .disabled.
+# Revisar docs/PIPELINE.md y sustituir adaptadores institucionales antes de activar.
+name: Authorized deployment candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexoandes-fase1-authorized-state
+  cancel-in-progress: false
+jobs:
+  controls:
+    uses: ./.github/workflows/ci.yml
+  plan:
+    needs: controls
+    if: github.ref == 'refs/heads/main' && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      digest: ${{ steps.bundle.outputs.digest }}
+      created: ${{ steps.bundle.outputs.created }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+      - name: Institutional authentication and locked backend (pending)
+        run: |
+          source ci/institutional-auth.sh
+          bash ci/institutional-init.sh
+      - name: Plan exact commit
+        run: |
+          mkdir -p artifacts
+          terraform plan -input=false -lock-timeout=120s -out=artifacts/review.tfplan
+          terraform show -no-color artifacts/review.tfplan > artifacts/review.txt
+          printf '%s\n' "$GITHUB_SHA" > artifacts/commit.txt
+      - name: Bind plan integrity and expiry
+        id: bundle
+        run: |
+          sha256sum artifacts/review.tfplan > artifacts/review.sha256
+          echo "digest=$(sha256sum artifacts/review.tfplan | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "created=$(date +%s)" >> "$GITHUB_OUTPUT"
+          echo "Review protected plan artifact for commit $GITHUB_SHA before environment approval." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reviewed-plan-${{ github.run_id }}-${{ github.sha }}
+          path: artifacts/
+          retention-days: 1
+          if-no-files-found: error
+  apply:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment: nexoandes-lab-approved
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: reviewed-plan-${{ github.run_id }}-${{ github.sha }}
+          path: artifacts
+      - name: Validate approved bytes, commit and age (4 hours)
+        env:
+          EXPECTED_DIGEST: ${{ needs.plan.outputs.digest }}
+          CREATED: ${{ needs.plan.outputs.created }}
+        run: |
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$(cat artifacts/commit.txt)" = "$GITHUB_SHA"
+          test "$(sha256sum artifacts/review.tfplan | cut -d' ' -f1)" = "$EXPECTED_DIGEST"
+          age=$(( $(date +%s) - CREATED ))
+          test "$age" -ge 0 && test "$age" -le 14400
+      - name: Institutional authentication and same locked backend (pending)
+        run: |
+          source ci/institutional-auth.sh
+          bash ci/institutional-init.sh
+      - name: Apply only approved saved plan
+        run: terraform apply -input=false -lock-timeout=120s artifacts/review.tfplan
+      - name: Independent verification
+        run: pwsh -File scripts/Verify-Deployment.ps1 -Region "$TF_VAR_aws_region" -PortalMarker "$PORTAL_EXPECTED_MARKER"
+      - name: Post-apply drift plan
+        run: terraform plan -input=false -detailed-exitcode -lock-timeout=120s -no-color
+      - name: Restricted evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: verification-${{ github.run_id }}
+          path: artifacts/verification/
+          retention-days: 1
