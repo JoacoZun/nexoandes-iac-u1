@@ -1,0 +1,5 @@
+checkov==3.2.495
+# Checkov y el verificador comparten el import hcl2 en este entorno Python 3.12.
+# No mezclar con python-hcl2: ambos distribuyen ese mismo módulo.
+bc-python-hcl2==0.4.3
+PyYAML==6.0.3

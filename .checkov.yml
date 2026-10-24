@@ -1,0 +1,23 @@
+framework:
+  - terraform
+directory:
+  - .
+skip-path:
+  - .terraform
+  - .tools
+  - .venv
+  - artifacts
+  - dist
+  - .git
+  - tests/fixtures
+download-external-modules: false
+compact: true
+quiet: true
+# Perfil explícito de controles relevantes; no equivale al catálogo completo.
+# HTTP público e IPv4 pública son requisitos de la Fase 1, no excepciones ocultas.
+check:
+  - CKV_AWS_8
+  - CKV_AWS_23
+  - CKV_AWS_24
+  - CKV_AWS_25
+  - CKV_AWS_79
