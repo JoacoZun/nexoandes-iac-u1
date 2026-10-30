@@ -1,24 +1,137 @@
-# NexoAndes - Fase 1
+# NexoAndes — Fase 1 — Portal Operacional V1
 
-Evaluación Sumativa U1
-Automatización de Infraestructura con IaC - IC106TICL
+Evaluación Sumativa U1 · Automatización de Infraestructura con IaC (IC106TICL) · Instituto Profesional San Sebastián.
 
-## Objetivo
-Implementar mediante Terraform una infraestructura AWS
-modular, reproducible y automatizada para el Portal
-Operacional NexoAndes V1.
+Repositorio individual: https://github.com/JoacoZun/nexoandes-iac-u1
 
-## Alcance
-- Infraestructura como Código con Terraform.
-- Módulos reutilizables.
-- Control de versiones mediante Git.
-- Pipeline CI/CD con controles y aprobación.
-- Despliegue automatizado en AWS.
-- Verificación funcional y limpieza controlada.
+Implementación modular para laboratorio AWS. El HEAD local `9f4ceac` contiene la configuración de lista 8; la plantilla oficial y su integración son cambios posteriores todavía sin commit ni CI remoto. Existe [Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1), sin atribuirle revisión humana, despliegue AWS ni portal comprobado. Consulte [resultados reales](docs/VALIDATION.md), [matriz CE1–CE8](docs/RUBRIC.md) y [evidencias](docs/EVIDENCE.md).
 
-## Estado
-Proyecto en preparación.
+## Arquitectura y estructura
 
-## Seguridad
-No versionar credenciales, secretos, archivos de state
-ni planes binarios de Terraform.
+```mermaid
+flowchart LR
+    Internet[Internet TCP/80] --> IGW[Internet Gateway]
+    IGW --> RT[Route Table 0.0.0.0/0]
+    RT --> SUB[Subnet 172.16.X.0/24]
+    SUB --> SG[SG entrada TCP/80]
+    SG --> EC2[EC2 IP pública IMDSv2 EBS cifrado]
+    ROOT[Root variables tags plantilla] --> NET[modules/network]
+    NET --> SEC[modules/security]
+    NET --> COMP[modules/compute]
+    SEC --> COMP
+```
+
+El diagrama representa conectividad lógica; una tabla de rutas no filtra tráfico. VPC fija `172.16.0.0/16`; `cidrsubnet(..., 8, X)` garantiza `172.16.X.0/24`. El número de lista confirmado es **8**: el root ofrece `list_number = 8` por defecto y genera **172.16.8.0/24**. La entrada se puede sobrescribir y se valida como entero entre 1 y 254 según la guía oficial; el módulo network conserva el cálculo reutilizable.
+
+`student_id` sigue siendo un input obligatorio para el prefijo de recursos y el tag `Student`. `student_name` es un input distinto y obligatorio: muestra el nombre académico real en el portal. `list_number` alimenta tanto el tag `ListNumber` como `student_number` en la plantilla. No se incluyen identidades inventadas en ejemplos.
+
+| Ruta | Responsabilidad |
+|---|---|
+| Root: main, variables, outputs | Composición, validaciones, contrato de entrada/salida |
+| versions, providers, lock | Restricciones, región explícita, versión y hashes reproducibles |
+| modules/network | VPC, subnet, IGW, tabla, ruta y asociación |
+| modules/security | SG, entrada HTTP y salida HTTP/HTTPS |
+| modules/compute | AMI, EC2, bootstrap, IMDSv2 y volumen raíz |
+| templates | Plantilla oficial verificada por SHA-256 e integrada con `templatefile()` |
+| tests | Aserciones Terraform con AWS mock, sin credenciales |
+| .github/workflows/ci.yml | Cinco controles sin AWS |
+| .github/workflows/deploy.yml.disabled | Candidato de despliegue inerte |
+| ci | Adaptadores institucionales explícitamente bloqueados |
+| scripts y docs | Controles, operación, PR, verificación y entrega |
+
+IDs transmitidos por outputs: network → security/compute y security → compute. La dependencia adicional de compute espera rutas y reglas de salida para arrancar con conectividad.
+
+## Versiones, seguridad y límites
+
+Terraform probado localmente con 1.16.6; lenguaje >=1.7 (mocks) y <2. AWS Provider `~> 6.42.0` fija la serie 6.42; el lock fija versión y hashes reales. Actualizar requiere PR y repetir controles. La guía institucional no se ha recibido.
+
+AMI predeterminada consultada a Amazon: AL2023 EBS/HVM x86_64. La plantilla admite `dnf`, `yum` y `apt-get`, requiere systemd/curl/nginx y escribe en `/usr/share/nginx/html`, ruta compatible con el paquete nginx de AL2023. Si la guía exige otra AMI, confirmar que su configuración de nginx sirve ese directorio. `most_recent` puede cambiar entre planes: registrar/preservar el ID aprobado para reconstrucción exacta. No se asume región ni tipo EC2 de despliegue.
+
+Sin SSH, key pair, rol IAM EC2 ni credenciales en código. Entrada solo TCP/80 público. Salida TCP/80 y TCP/443 para repositorios; SG stateful permite respuestas sin abrir puertos efímeros. DNS utiliza AmazonProvidedDNS, cuyo tráfico no filtra el SG. Revisar necesidades al recibir la plantilla. HTTP e IPv4 pública son exposiciones requeridas. EC2/EBS/IPv4 pueden tener costo; no se presupone Free Tier.
+
+## Cinco controles sin AWS
+
+```powershell
+terraform init -backend=false -input=false -lockfile=readonly
+terraform fmt -check -recursive
+terraform validate
+terraform test
+tflint --init
+tflint --recursive
+./.tools/python/python.exe -m checkov.main --config-file .checkov.yml
+./.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v
+./.venv/Scripts/python.exe scripts/check_repository.py
+```
+
+Los `apply` de `terraform test` usan exclusivamente `mock_provider "aws"`. Los datos sintéticos de pruebas no autorizan región/tipo EC2 de despliegue. La fixture no implementa el portal.
+
+Desde Git Bash, repetir la validación completa del SHA final:
+
+```bash
+terraform init -backend=false -input=false -lockfile=readonly
+terraform fmt -check -recursive
+printf '%s  %s\n' '0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb' 'templates/user_data_v1.sh.tpl' | sha256sum --check --strict
+bash -n templates/user_data_v1.sh.tpl
+terraform validate -no-color
+terraform test -no-color
+./.venv/Scripts/python.exe scripts/check_repository.py
+./.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v
+export TFLINT_PLUGIN_DIR="$PWD/.tools/tflint-plugins"
+./.tools/tflint/tflint.exe --recursive --max-workers=1 --config="$PWD/.tflint.hcl"
+./.tools/python/python.exe -m checkov.main --config-file .checkov.yml
+./.tools/actionlint/actionlint.exe -shellcheck= .github/workflows/ci.yml .github/workflows/deploy.yml.disabled
+git diff --check
+```
+
+El `terraform test` esperado declara ocho runs con `mock_provider "aws"`; revisar su
+salida efectiva y no continuar al despliegue si validate/test fallan.
+
+En este equipo la política de Windows PowerShell bloqueó `.ps1`. Se comprobó la previsualización usando `powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File scripts/Build-Submission.ps1 -Preview`, limitado a ese proceso y sin cambiar la política global. Para el runner local se puede usar el mismo prefijo con `scripts/Invoke-Checks.ps1`. Esto no soluciona el bloqueo mTLS del provider registrado en `docs/VALIDATION.md`; no desactivar TLS para intentar validar.
+
+El `.venv` existente usa Python 3.13 y `requirements-repository.txt` (python-hcl2 8.1.4 y PyYAML 6.0.3). No recrearlo: si faltan dependencias, usar `.venv\Scripts\python -m pip install -r requirements-repository.txt`. Checkov conserva el Python 3.12 existente en `.tools/python/` y el CI usa `requirements-ci.txt`, que declara su fork bc-python-hcl2 0.4.3. **No instalar ambos conjuntos en un mismo entorno:** ambos parsers distribuyen el módulo `hcl2`. El verificador y sus 20 regresiones se prueban en los dos entornos; CI mantiene jobs separados para ellos.
+
+TFLint 0.61.0 utiliza el plugin AWS 0.40.0 fijado en `.tflint.hcl`. Si no está en PATH, usar `.tools/tflint/tflint.exe` en los comandos anteriores. Antes de init, fijar `$env:TFLINT_PLUGIN_DIR = Join-Path $PWD '.tools/tflint-plugins'` para mantener plugins en el proyecto. Dependencias principales fijadas; las transitivas de pip se resuelven al instalar, por lo que no se afirma entorno hermético. `scripts/Invoke-Checks.ps1` prefiere `.venv` para las regresiones/verificador, mantiene Checkov en Python 3.12 y registra PASS/FAIL/NOT_RUN en `artifacts/checks/`, excluido de Git.
+
+Checkov ejecuta cinco políticas seleccionadas: cifrado EBS, descripción SG, ausencia de SSH/RDP público e IMDSv2. El resultado se limita a ese perfil. La política local adicional rechaza entradas extra y claves SSH. Un escaneo del catálogo completo puede mostrar hallazgos fuera de alcance que se deben revisar y justificar; no se han ocultado mediante `soft-fail`. En particular, CKV_AWS_260 exige cerrar HTTP público, incompatible con el diagrama obligatorio de esta Fase 1.
+
+## Configuración pendiente antes del plan real
+
+Lista 8 y plantilla oficial confirmadas. Su SHA-256 es `0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb`; [README_ESTUDIANTE.md](docs/README_ESTUDIANTE.md) se conserva sin modificaciones. Faltan el `student_id`, el nombre académico real y la guía técnica vigente de despliegue. La guía debe confirmar región, tipo EC2, compatibilidad AMI/SO, autenticación, state/backend/locking, gate y restricciones del laboratorio. AWS Academy Learner Lab [193444] es solo una posibilidad, no el entorno autorizado confirmado. También debe cotejarse la plantilla oficial de la Ficha antes del PDF.
+
+`terraform.tfvars.example` contiene la lista 8 y marcadores comentados, sin identidad, región, tipo ni credenciales inventados. Copiarlo a `lab.auto.tfvars` (ignorado) **solo si ese archivo no existe** y completar los campos requeridos:
+
+```hcl
+# Completar sin copiar marcadores como valores:
+# aws_region = ...
+list_number = 8
+# student_id = ...
+# student_name = ... # nombre académico real; distinto de student_id
+# instance_type = ...
+# ami_id = ... # opcional; null consulta AL2023
+```
+
+El root usa `templatefile("${path.module}/templates/user_data_v1.sh.tpl", {...})` y entrega nombre real, lista 8 convertida con `tostring()`, `fase1`, `v1` y `NexoAndes Portal Operacional` a compute. No ejecutar plan real con variables incompletas. Integridad no equivale a funcionamiento: el portal necesita despliegue y prueba HTTP reales; ver [contrato](templates/README.md).
+
+El cierre ordenado está en [OPERATIONS.md](docs/OPERATIONS.md): plantilla y variables → autenticación/backend autorizados → revisión/CI del SHA final → activación aprobada → plan protegido y gate real → apply desde pipeline → AWS/HTTP y plan posterior → limpieza autorizada → ZIP/PDF inspeccionados. No ejecutar todavía esas operaciones AWS.
+
+No hay backend ficticio. El backend local actual sirve solo para validar; no usarlo en runners efímeros. `init -backend=false` no configura state remoto. Los adaptadores `ci/` deben incorporar autenticación/backend autorizados antes de activar despliegue. Mantener state, planes y variables privadas fuera de Git, incluso después de destroy.
+
+## Operación y entrega
+
+[Pipeline y gate](docs/PIPELINE.md) · [Verificación y limpieza](docs/OPERATIONS.md) · [Git y PR](docs/PULL_REQUEST.md) · [Evidencias y EVA](docs/EVIDENCE.md).
+
+No ejecutar apply/destroy sin autorización explícita. No se crean commits, pushes, merges o PR automáticamente. ZIP/PDF finales requieren identificación y evidencias completas. El script de ZIP filtra extensiones/rutas y exige además revisión humana de secretos.
+
+## Referencias y apoyo (APA 7)
+
+HashiCorp. (s. f.). *Provider mocking*. https://developer.hashicorp.com/terraform/language/tests/mocking
+
+HashiCorp. (s. f.). *AWS Provider 6.42.0*. https://registry.terraform.io/providers/hashicorp/aws/6.42.0/docs
+
+GitHub. (s. f.). *Managing environments for deployment*. https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments
+
+Palo Alto Networks. (s. f.). *Checkov CLI command reference*. https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+
+Amazon Web Services. (s. f.). *Security group rules*. https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html
+
+Referencias consultadas el 24 de octubre de 2026. ChatGPT/Codex se utilizó para apoyar generación, revisión y validación de código y documentación. El estudiante debe comprender, revisar y asumir responsabilidad por decisiones/resultados. No se atribuyen despliegues ni evidencias inexistentes.
