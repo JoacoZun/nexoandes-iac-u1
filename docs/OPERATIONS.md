@@ -14,13 +14,13 @@ provider documentado en VALIDATION.md: son incidencias diferentes.
 
 Lista confirmada: 8; VPC 172.16.0.0/16 y subnet 172.16.8.0/24. La reutilización
 permanece en los inputs; no editar el CIDR de network para otro estudiante.
-student_id es obligatorio y debe ser el mismo en nombres y tags; no deducir nombre
-legal/RUT a partir del usuario GitHub. Región/tipo de las pruebas son mocks.
+`student_id` es obligatorio para nombres/tags y `student_name` para el nombre real
+visible en el portal; no deducir ninguno desde GitHub. Región/tipo de pruebas son mocks.
 
 | Paso | Acción concreta y condición de avance |
 |---|---|
-| 1. Plantilla oficial | Obtener user_data_v1.sh.tpl del docente, registrar origen/fecha/SHA256 con Get-FileHash, copiar a templates/ conservando lógica. Revisar variables, SO, paquetes, expansiones shell y alcance de red con templates/README.md. No usar tests/fixtures como bootstrap. |
-| 2. Variables | Si no existe lab.auto.tfvars, copiar terraform.tfvars.example; si existe, revisar/completar sin sobrescribirlo. Mantener lista 8; completar student_id real, región/tipo autorizados, AMI/SO compatible y portal_parameters. El archivo incompleto no permite un despliegue. |
+| 1. Plantilla oficial | Integrada sin modificaciones; verificar antes de cada entrega el SHA-256 `0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb` y `bash -n`. Conservar también `docs/README_ESTUDIANTE.md`. |
+| 2. Variables | Si no existe lab.auto.tfvars, copiar terraform.tfvars.example; si existe, revisar/completar sin sobrescribirlo. Mantener lista 8; completar student_id, student_name, región/tipo autorizados y AMI/SO compatible. El archivo incompleto no permite un despliegue. |
 | 3. Autenticación | Confirmar cuenta/laboratorio en la guía, incluido si Learner Lab [193444] está autorizado. Implementar mecanismo temporal aprobado en ci/institutional-auth.sh o acción equivalente; comprobar identidad y permisos sin publicar credenciales. No asumir OIDC ni claves permanentes. |
 | 4. State | Implementar ci/institutional-init.sh con backend cifrado/acceso mínimo/locking autorizado. Usar el mismo estado en plan/apply/limpieza y init readonly; documentar su ciclo de vida, sin inventar buckets, roles ni IDs. |
 | 5. Revisión y activación | Revisar la Draft PR #1 existente, registrar revisión humana y ejecutar CI del SHA final. Integración/activación solo por autorización del responsable y guía. Si se autoriza Actions, configurar environment real, reviewers, ramas, privacidad del plan y adaptar los steps; recién entonces cambiar extensión disabled mediante revisión. |
@@ -35,7 +35,7 @@ refs de PR/CI base en EVIDENCE.md; la preparación local aún no está en sus ch
 
 ## Preparación
 
-1. Completar requisitos pendientes del README y revisar plantilla original/SHA256.
+1. Completar identidad y parámetros del laboratorio; volver a verificar plantilla/SHA256.
 2. Ejecutar cinco controles sin AWS; resolver fallos. Confirmar PR, SHA revisado y
    estrategia institucional de CI/CD, credenciales y state. No guardar secretos
    en TF_VAR, tfvars versionados, user_data, logs o PR.

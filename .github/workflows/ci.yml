@@ -35,6 +35,10 @@ jobs:
         run: terraform init -backend=false -input=false -lockfile=readonly
       - name: Format
         run: terraform fmt -check -recursive
+      - name: Official portal template integrity and syntax
+        run: |
+          printf '%s  %s\n' '0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb' 'templates/user_data_v1.sh.tpl' | sha256sum --check --strict
+          bash -n templates/user_data_v1.sh.tpl
       - name: Validate
         if: ${{ !cancelled() }}
         run: terraform validate -no-color

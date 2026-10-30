@@ -4,7 +4,7 @@ Evaluación Sumativa U1 · Automatización de Infraestructura con IaC (IC106TICL
 
 Repositorio individual: https://github.com/JoacoZun/nexoandes-iac-u1
 
-Implementación modular para laboratorio AWS. Hay cinco commits de implementación, [Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1) y cuatro checks exitosos en dos ejecuciones CI de `e7f6025`. No hay revisión humana registrada, despliegue AWS ni portal comprobado. Los cambios locales para lista 8 aún requieren commit y nueva CI, que no se ejecutan automáticamente desde esta preparación. Consulte [resultados reales](docs/VALIDATION.md), [matriz CE1–CE8](docs/RUBRIC.md) y [evidencias](docs/EVIDENCE.md).
+Implementación modular para laboratorio AWS. El HEAD local `9f4ceac` contiene la configuración de lista 8; la plantilla oficial y su integración son cambios posteriores todavía sin commit ni CI remoto. Existe [Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1), sin atribuirle revisión humana, despliegue AWS ni portal comprobado. Consulte [resultados reales](docs/VALIDATION.md), [matriz CE1–CE8](docs/RUBRIC.md) y [evidencias](docs/EVIDENCE.md).
 
 ## Arquitectura y estructura
 
@@ -21,9 +21,9 @@ flowchart LR
     SEC --> COMP
 ```
 
-El diagrama representa conectividad lógica; una tabla de rutas no filtra tráfico. VPC fija `172.16.0.0/16`; `cidrsubnet(..., 8, X)` garantiza `172.16.X.0/24`. El número de lista confirmado es **8**: el root ofrece `list_number = 8` por defecto y genera **172.16.8.0/24**. X se puede sobrescribir y se valida como entero en [0,255]; el módulo network no tiene un valor fijo para el estudiante 8. Las pruebas conservan el caso reutilizable X=255.
+El diagrama representa conectividad lógica; una tabla de rutas no filtra tráfico. VPC fija `172.16.0.0/16`; `cidrsubnet(..., 8, X)` garantiza `172.16.X.0/24`. El número de lista confirmado es **8**: el root ofrece `list_number = 8` por defecto y genera **172.16.8.0/24**. La entrada se puede sobrescribir y se valida como entero entre 1 y 254 según la guía oficial; el módulo network conserva el cálculo reutilizable.
 
-`student_id` sigue siendo un input obligatorio, sin inventar nombre ni identidad. Un único valor alimenta el prefijo de nombres y el tag `Student`; los tags comunes son `Project`, `Phase`, `Environment`, `Student`, `ListNumber` y `ManagedBy`. `ListNumber` se deriva del input, no de un literal en los módulos.
+`student_id` sigue siendo un input obligatorio para el prefijo de recursos y el tag `Student`. `student_name` es un input distinto y obligatorio: muestra el nombre académico real en el portal. `list_number` alimenta tanto el tag `ListNumber` como `student_number` en la plantilla. No se incluyen identidades inventadas en ejemplos.
 
 | Ruta | Responsabilidad |
 |---|---|
@@ -32,7 +32,7 @@ El diagrama representa conectividad lógica; una tabla de rutas no filtra tráfi
 | modules/network | VPC, subnet, IGW, tabla, ruta y asociación |
 | modules/security | SG, entrada HTTP y salida HTTP/HTTPS |
 | modules/compute | AMI, EC2, bootstrap, IMDSv2 y volumen raíz |
-| templates | Integración pendiente de plantilla oficial |
+| templates | Plantilla oficial verificada por SHA-256 e integrada con `templatefile()` |
 | tests | Aserciones Terraform con AWS mock, sin credenciales |
 | .github/workflows/ci.yml | Cinco controles sin AWS |
 | .github/workflows/deploy.yml.disabled | Candidato de despliegue inerte |
@@ -45,7 +45,7 @@ IDs transmitidos por outputs: network → security/compute y security → comput
 
 Terraform probado localmente con 1.16.6; lenguaje >=1.7 (mocks) y <2. AWS Provider `~> 6.42.0` fija la serie 6.42; el lock fija versión y hashes reales. Actualizar requiere PR y repetir controles. La guía institucional no se ha recibido.
 
-AMI predeterminada consultada a Amazon: AL2023 EBS/HVM x86_64. Si la guía exige otra, proporcionar `ami_id` de la región autorizada y confirmar compatibilidad con script/tipo EC2. `most_recent` puede cambiar entre planes: registrar/preservar el ID aprobado para reconstrucción exacta. No se asume región ni tipo EC2 de despliegue.
+AMI predeterminada consultada a Amazon: AL2023 EBS/HVM x86_64. La plantilla admite `dnf`, `yum` y `apt-get`, requiere systemd/curl/nginx y escribe en `/usr/share/nginx/html`, ruta compatible con el paquete nginx de AL2023. Si la guía exige otra AMI, confirmar que su configuración de nginx sirve ese directorio. `most_recent` puede cambiar entre planes: registrar/preservar el ID aprobado para reconstrucción exacta. No se asume región ni tipo EC2 de despliegue.
 
 Sin SSH, key pair, rol IAM EC2 ni credenciales en código. Entrada solo TCP/80 público. Salida TCP/80 y TCP/443 para repositorios; SG stateful permite respuestas sin abrir puertos efímeros. DNS utiliza AmazonProvidedDNS, cuyo tráfico no filtra el SG. Revisar necesidades al recibir la plantilla. HTTP e IPv4 pública son exposiciones requeridas. EC2/EBS/IPv4 pueden tener costo; no se presupone Free Tier.
 
@@ -65,6 +65,27 @@ tflint --recursive
 
 Los `apply` de `terraform test` usan exclusivamente `mock_provider "aws"`. Los datos sintéticos de pruebas no autorizan región/tipo EC2 de despliegue. La fixture no implementa el portal.
 
+Desde Git Bash, repetir la validación completa del SHA final:
+
+```bash
+terraform init -backend=false -input=false -lockfile=readonly
+terraform fmt -check -recursive
+printf '%s  %s\n' '0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb' 'templates/user_data_v1.sh.tpl' | sha256sum --check --strict
+bash -n templates/user_data_v1.sh.tpl
+terraform validate -no-color
+terraform test -no-color
+./.venv/Scripts/python.exe scripts/check_repository.py
+./.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v
+export TFLINT_PLUGIN_DIR="$PWD/.tools/tflint-plugins"
+./.tools/tflint/tflint.exe --recursive --max-workers=1 --config="$PWD/.tflint.hcl"
+./.tools/python/python.exe -m checkov.main --config-file .checkov.yml
+./.tools/actionlint/actionlint.exe -shellcheck= .github/workflows/ci.yml .github/workflows/deploy.yml.disabled
+git diff --check
+```
+
+El `terraform test` esperado declara ocho runs con `mock_provider "aws"`; revisar su
+salida efectiva y no continuar al despliegue si validate/test fallan.
+
 En este equipo la política de Windows PowerShell bloqueó `.ps1`. Se comprobó la previsualización usando `powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File scripts/Build-Submission.ps1 -Preview`, limitado a ese proceso y sin cambiar la política global. Para el runner local se puede usar el mismo prefijo con `scripts/Invoke-Checks.ps1`. Esto no soluciona el bloqueo mTLS del provider registrado en `docs/VALIDATION.md`; no desactivar TLS para intentar validar.
 
 El `.venv` existente usa Python 3.13 y `requirements-repository.txt` (python-hcl2 8.1.4 y PyYAML 6.0.3). No recrearlo: si faltan dependencias, usar `.venv\Scripts\python -m pip install -r requirements-repository.txt`. Checkov conserva el Python 3.12 existente en `.tools/python/` y el CI usa `requirements-ci.txt`, que declara su fork bc-python-hcl2 0.4.3. **No instalar ambos conjuntos en un mismo entorno:** ambos parsers distribuyen el módulo `hcl2`. El verificador y sus 20 regresiones se prueban en los dos entornos; CI mantiene jobs separados para ellos.
@@ -75,22 +96,21 @@ Checkov ejecuta cinco políticas seleccionadas: cifrado EBS, descripción SG, au
 
 ## Configuración pendiente antes del plan real
 
-Lista 8 confirmada. Faltan el identificador académico/nombre para la entrega y dos materiales del docente: **user_data_v1.sh.tpl** y **guía técnica vigente de despliegue**. La guía debe confirmar región, tipo EC2, compatibilidad AMI/SO, autenticación, state/backend/locking, gate y restricciones del laboratorio. AWS Academy Learner Lab [193444] es solo una posibilidad, no el entorno autorizado confirmado. También debe cotejarse la plantilla oficial de la Ficha antes del PDF.
+Lista 8 y plantilla oficial confirmadas. Su SHA-256 es `0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb`; [README_ESTUDIANTE.md](docs/README_ESTUDIANTE.md) se conserva sin modificaciones. Faltan el `student_id`, el nombre académico real y la guía técnica vigente de despliegue. La guía debe confirmar región, tipo EC2, compatibilidad AMI/SO, autenticación, state/backend/locking, gate y restricciones del laboratorio. AWS Academy Learner Lab [193444] es solo una posibilidad, no el entorno autorizado confirmado. También debe cotejarse la plantilla oficial de la Ficha antes del PDF.
 
-`terraform.tfvars.example` contiene solo la lista 8 y la ruta esperada de la plantilla, sin región/tipo/credenciales inventados. Cuando lleguen los materiales, copiarlo a `lab.auto.tfvars` (ignorado) **solo si ese archivo no existe** y completar los campos requeridos:
+`terraform.tfvars.example` contiene la lista 8 y marcadores comentados, sin identidad, región, tipo ni credenciales inventados. Copiarlo a `lab.auto.tfvars` (ignorado) **solo si ese archivo no existe** y completar los campos requeridos:
 
 ```hcl
 # Completar sin copiar marcadores como valores:
 # aws_region = ...
 list_number = 8
 # student_id = ...
+# student_name = ... # nombre académico real; distinto de student_id
 # instance_type = ...
 # ami_id = ... # opcional; null consulta AL2023
-user_data_template_path = "templates/user_data_v1.sh.tpl"
-portal_parameters       = {} # adaptar al contrato oficial
 ```
 
-No ejecutar plan real con archivo incompleto. Plantilla ausente, vacía o con error de renderizado bloquea EC2. Autenticidad y funcionamiento se revisan aparte; ver [contrato](templates/README.md).
+El root usa `templatefile("${path.module}/templates/user_data_v1.sh.tpl", {...})` y entrega nombre real, lista 8 convertida con `tostring()`, `fase1`, `v1` y `NexoAndes Portal Operacional` a compute. No ejecutar plan real con variables incompletas. Integridad no equivale a funcionamiento: el portal necesita despliegue y prueba HTTP reales; ver [contrato](templates/README.md).
 
 El cierre ordenado está en [OPERATIONS.md](docs/OPERATIONS.md): plantilla y variables → autenticación/backend autorizados → revisión/CI del SHA final → activación aprobada → plan protegido y gate real → apply desde pipeline → AWS/HTTP y plan posterior → limpieza autorizada → ZIP/PDF inspeccionados. No ejecutar todavía esas operaciones AWS.
 

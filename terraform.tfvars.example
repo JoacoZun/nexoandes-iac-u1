@@ -4,9 +4,10 @@
 list_number = 8
 
 # student_id = ...    # identificador académico real, mismo valor en nombres y tags
+# student_name = ...  # nombre académico real visible en el portal; no es student_id
 # aws_region = ...    # completar exclusivamente con la región autorizada
 # instance_type = ... # completar según guía; confirmar arquitectura y compatibilidad AMI
 # ami_id = ...        # opcional; null consulta AL2023 x86_64
 
-user_data_template_path = "templates/user_data_v1.sh.tpl" # archivo oficial aún pendiente
-portal_parameters       = {} # completar exclusivamente según la plantilla recibida
+# environment usa "fase1" por defecto. La plantilla y sus otros valores oficiales
+# se conectan directamente en main.tf; este archivo no contiene secretos.

@@ -17,7 +17,9 @@ Terraform 1.16.6, provider 6.42.0, acciones por SHA, TFLint/plugin y dependencia
 directas Python están fijados. Las dependencias transitivas pip no son un lock
 hermético. El init Linux readonly pasó en ambos jobs controls; los SHA256 zh de
 Linux/Windows también se cotejaron con el manifiesto oficial de HashiCorp.
-El cambio local lista 8 requiere su propia corrida futura de CI.
+El commit local `9f4ceac` incorpora lista 8. La integración posterior de la plantilla
+oficial requiere su propia corrida futura de CI. El workflow ahora comprueba el hash
+docente y `bash -n` antes de validate; este cambio aún no tiene ejecución remota.
 
 Flujo candidato: dispatch desde main → cinco controles → autenticación temporal
 e init con backend aprobado → plan binario y texto del mismo SHA → artefacto
@@ -31,9 +33,9 @@ regenerarlo silenciosamente en apply. Terraform valida linaje/serial del state.
 ## Configuración manual requerida antes de habilitar
 
 1. Recibir guía y autorización expresa para plataforma, cuenta, región, tipo EC2,
-   plantilla oficial, método de autenticación, backend y despliegue.
-2. Incorporar plantilla real revisada, variables completas y un marcador de contenido
-   oficial para `PORTAL_EXPECTED_MARKER`. Pasar las variables no secretas mediante
+   método de autenticación, backend y despliegue. La plantilla ya está integrada.
+2. Completar variables e indicar un marcador de contenido oficial para
+   `PORTAL_EXPECTED_MARKER`. Pasar las variables no secretas mediante
    configuración aprobada/TF_VAR; no interpretar contenido externo como código shell.
 3. Reemplazar `ci/institutional-auth.sh` por autenticación temporal aprobada, ejecutada
    de nuevo en cada job. Si se permite OIDC, restringir trust a repositorio, branch o
@@ -77,6 +79,13 @@ como account ID/rol AWS ni asumir que permite crear IAM u OIDC. Siguen pendiente
 región, tipo EC2, identidad académica real, cuenta/roles o sesión temporal autorizada,
 ubicación/cifrado del state, locking, gate y privacidad del plan. El candidato sigue
 disabled y los adaptadores siguen fallando explícitamente.
+
+En Learner Lab se debe comprobar, con la sesión autorizada: cuenta y región efectivas;
+tipos EC2/AMI permitidos y cuotas; permisos EC2/VPC/SG/route/IGW; duración y renovación
+de credenciales temporales; prohibiciones IAM/OIDC; servicios disponibles para state
+remoto y locking; persistencia del state entre sesiones; costos/presupuesto; soporte
+de GitHub Actions o runner exigido; y procedimiento institucional de aprobación y
+limpieza. Registrar resultados sin publicar account ID completo, tokens ni secretos.
 
 El hash SHA256 esperado pasa por outputs del job plan, separado del archivo descargado;
 el job apply compara hash, commit y antigüedad. El nombre de artefacto incluye run ID

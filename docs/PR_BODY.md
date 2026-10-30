@@ -10,9 +10,11 @@ genérico. Región, tipo e identidad deben completarse con datos reales autoriza
 
 - Módulos network/security/compute, inputs validados, outputs/tags y provider lock
   6.42.0 con checksums Windows/Linux contrastados con HashiCorp.
-- Preparación local nueva: default 8, tag ListNumber derivado, prueba root de subnet
-  e identidad y ejemplo público de variables sin secretos, incluido en el ZIP limpio.
-- Integración de plantilla docente con bloqueo si falta o no se puede renderizar.
+- `9f4ceac`: default 8, tag ListNumber derivado, prueba root de subnet e identidad
+  y ejemplo público de variables sin secretos.
+- Integración local posterior de la plantilla docente verificada por SHA-256:
+  cinco parámetros explícitos, `student_name` separado de `student_id`, renderizado
+  en root y contenido entregado a compute. CI comprueba hash y sintaxis Bash.
 - Pruebas con AWS mock, TFLint y Checkov con perfil documentado; CI sin credenciales.
 - Candidato de pipeline desactivado con plan guardado, integridad, caducidad,
   concurrencia y gate por environment que requiere configuración manual real.
@@ -29,17 +31,18 @@ Base publicada verificada: `e7f6025bc8fd7e221942c19d3fd0eb579809410b`.
 - Cada ejecución tiene controls y repository-python en success: cuatro checks,
   dos ejecuciones; init/format/validate/mocks/lint/security/policy aprobados en la base.
 
-Los cambios de lista 8 son locales sin commit y aún no están cubiertos por esos
-checks. Repetir CI sobre su futuro SHA antes de revisar integración. Los resultados
+El HEAD local es `9f4ceac`; la integración oficial posterior aún no está cubierta
+por esos checks. Repetir CI sobre su futuro SHA antes de revisar integración. Los resultados
 locales y el límite mTLS de Codex están en `docs/VALIDATION.md`.
 No hay plan real, apply, HTTP ni destroy acreditados. Esta propuesta no se envió a GitHub.
 
 ## Riesgos y requisitos pendientes
 
-Faltan user_data_v1.sh.tpl, guía técnica vigente y cotejo de la plantilla de Ficha.
-La guía debe autorizar región/tipo, autenticación, backend/locking, gate y laboratorio;
-Learner Lab [193444] no está confirmado. Completar identidad académica real y
-confirmar compatibilidad AMI/script. HTTP e IPv4
+La plantilla y su README oficial ya están presentes; no modificarlos. Faltan guía
+técnica vigente y cotejo de la plantilla de Ficha. La guía debe autorizar región/tipo,
+autenticación, backend/locking, gate y laboratorio; Learner Lab [193444] no está
+confirmado. Completar `student_id` y `student_name` reales y confirmar compatibilidad
+AMI/script. HTTP e IPv4
 pública son requisitos y pueden implicar exposición/costo. No activar despliegue
 hasta configurar gate, almacenamiento restringido del plan y adaptadores reales.
 No contiene recursos adicionales de negocio ni autorización para apply/destroy.

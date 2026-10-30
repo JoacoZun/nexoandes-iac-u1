@@ -12,8 +12,8 @@ variable "list_number" {
   type        = number
   default     = 8
   validation {
-    condition     = var.list_number >= 0 && var.list_number <= 255 && floor(var.list_number) == var.list_number
-    error_message = "X debe ser un entero entre 0 y 255; confirmar el número con el docente."
+    condition     = var.list_number >= 1 && var.list_number <= 254 && floor(var.list_number) == var.list_number
+    error_message = "X debe ser un entero entre 1 y 254, según la guía oficial."
   }
 }
 
@@ -26,13 +26,26 @@ variable "student_id" {
   }
 }
 
-variable "environment" {
-  description = "Ambiente del laboratorio."
+variable "student_name" {
+  description = "Nombre académico real que muestra el portal; es distinto de student_id."
   type        = string
-  default     = "lab"
   validation {
-    condition     = contains(["lab", "dev", "test"], var.environment)
-    error_message = "Ambiente permitido: lab, dev o test."
+    condition = (
+      var.student_name == trimspace(var.student_name) &&
+      length(var.student_name) >= 2 && length(var.student_name) <= 100 &&
+      alltrue([for forbidden in ["\"", "$", "`", "\\", "\n", "\r"] : !strcontains(var.student_name, forbidden)])
+    )
+    error_message = "Use el nombre académico real (2–100 caracteres), sin bordes en blanco ni caracteres de expansión de shell."
+  }
+}
+
+variable "environment" {
+  description = "Ambiente visible y tag de la Fase 1."
+  type        = string
+  default     = "fase1"
+  validation {
+    condition     = var.environment == "fase1"
+    error_message = "La guía oficial de NexoAndes Fase 1 exige environment = fase1."
   }
 }
 
@@ -54,19 +67,4 @@ variable "ami_id" {
     condition     = var.ami_id == null ? true : can(regex("^ami-([0-9a-f]{8}|[0-9a-f]{17})$", var.ami_id))
     error_message = "Indique un ID AMI válido o null."
   }
-}
-
-variable "user_data_template_path" {
-  description = "Ruta de la plantilla OFICIAL, relativa al root o absoluta. Obligatoria; no hay reemplazo."
-  type        = string
-  validation {
-    condition     = endswith(var.user_data_template_path, ".tpl")
-    error_message = "La ruta debe apuntar a la plantilla oficial .tpl."
-  }
-}
-
-variable "portal_parameters" {
-  description = "Mapa de parámetros según contrato de la plantilla docente; sin secretos."
-  type        = map(string)
-  default     = {}
 }

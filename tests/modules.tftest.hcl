@@ -19,12 +19,12 @@ run "network_contract" {
   module { source = "./modules/network" }
   variables {
     name        = "mock-network"
-    list_number = 255
+    list_number = 254
     tags        = { Project = "Mock" }
   }
   assert {
-    condition     = aws_vpc.this.cidr_block == "172.16.0.0/16" && aws_subnet.public.cidr_block == "172.16.255.0/24"
-    error_message = "VPC y subnet deben conservar los rangos exigidos, incluido el límite X=255."
+    condition     = aws_vpc.this.cidr_block == "172.16.0.0/16" && aws_subnet.public.cidr_block == "172.16.254.0/24"
+    error_message = "VPC y subnet deben conservar los rangos exigidos, incluido el límite válido X=254."
   }
   assert {
     condition     = aws_subnet.public.vpc_id == aws_vpc.this.id && aws_internet_gateway.this.vpc_id == aws_vpc.this.id
@@ -74,8 +74,8 @@ run "compute_contract" {
     tags              = { Project = "Mock" }
   }
   assert {
-    condition     = aws_instance.portal.metadata_options[0].http_tokens == "required" && aws_instance.portal.metadata_options[0].http_put_response_hop_limit == 1
-    error_message = "EC2 debe exigir IMDSv2 con hop limit 1."
+    condition     = aws_instance.portal.metadata_options[0].http_endpoint == "enabled" && aws_instance.portal.metadata_options[0].http_tokens == "required" && aws_instance.portal.metadata_options[0].http_put_response_hop_limit == 1
+    error_message = "EC2 debe habilitar metadata y exigir IMDSv2 con hop limit 1."
   }
   assert {
     condition     = aws_instance.portal.subnet_id == "subnet-mock" && aws_instance.portal.vpc_security_group_ids == toset(["sg-mock"]) && aws_instance.portal.associate_public_ip_address

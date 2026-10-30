@@ -1,8 +1,9 @@
 # Plan de ficha de evidencias — NO es la ficha final
 
 Entrega EVA exactamente: URL del repositorio, `eva1_apellidos_nombres.zip` y
-`eva1_apellidos_nombres.pdf`. Ya hay repositorio, cinco commits, Draft PR y CI
-verificados; faltan identidad de entrega, materiales oficiales y evidencias AWS.
+`eva1_apellidos_nombres.pdf`. Ya hay repositorio, seis commits hasta `9f4ceac`,
+Draft PR y CI histórica; la plantilla oficial está integrada localmente. Faltan
+identidad de entrega, guía institucional, CI del SHA final y evidencias AWS.
 No se genera PDF final para aparentar revisión humana o E05–E08 ejecutados.
 
 La ficha final tendrá ocho evidencias significativas (dentro del rango 6–8),
@@ -14,10 +15,10 @@ anterior proviene de los requisitos comunicados, no de un archivo docente recibi
 
 | ID | Qué demuestra y fuente real requerida | CE | Estado |
 |---|---|---|---|
-| E01 | URL, árbol y git status/log del repositorio local/remoto | CE3 | Cinco commits desde main; base e7f6025; ajuste lista 8 local sin commit |
-| E02 | Código módulos, variables, outputs, dependencias y diagrama | CE1, CE2 | Tres módulos; lista 8, tag y prueba preparados; faltan plantilla/configuración institucional |
+| E01 | URL, árbol y git status/log del repositorio local/remoto | CE3 | Seis commits desde main hasta 9f4ceac; integración del portal local sin commit |
+| E02 | Código módulos, variables, outputs, dependencias y diagrama | CE1, CE2 | Tres módulos; lista 8 y plantilla oficial conectadas; falta configuración institucional/despliegue |
 | E03 | Branch, commits SHA, PR y revisión humana/resolución | CE3, CE4 | Draft PR #1 real abierta, 0 reviews; revisión humana pendiente |
-| E04 | Cinco controles diferenciados, aserciones y resultados con exit codes | CE6 | Dos ejecuciones success y cuatro checks en e7f6025; preparación local exige CI de su SHA |
+| E04 | Cinco controles diferenciados, aserciones y resultados con exit codes | CE6 | CI histórica success; integración local exige CI propia, incluido hash y bash -n |
 | E05 | Trigger/init/plan, SHA/hash y gate real con aprobador/run ID | CE5 | Solo candidato; sin ejecución ni gate configurado |
 | E06 | Apply automatizado, identidad temporal saneada, backend/locking | CE7 | Pendiente autorización y ejecución AWS |
 | E07 | Outputs y AWS mismo ID/IP, HTTP contenido oficial, plan posterior | CE2, CE8 | Pendiente despliegue |
@@ -58,11 +59,11 @@ Demuestra: VPC 172.16.0.0/16, subnet derivada del input X, IGW/ruta/asociación,
 SG HTTP sin SSH y EC2 con IMDSv2/EBS cifrado. Fuente: `main.tf`, `variables.tf`,
 `outputs.tf` y `modules/`; commit de infraestructura
 [`86dc894`](https://github.com/JoacoZun/nexoandes-iac-u1/commit/86dc894e8c257649a07868f733d606c0f5f642cf).
-La preparación local del 24-10-2026 configura default X=8, subnet 172.16.8.0/24
-y tag ListNumber derivado; el caso de prueba X=255 permanece para reutilización.
-Agregar SHA del cambio lista 8 y captura de sus assertions cuando pase CI. Faltan
-plantilla oficial y comprobación funcional del portal; el diagrama es diseño,
-no evidencia de recursos creados.
+El commit local `9f4ceac` configura X=8, subnet 172.16.8.0/24 y tag derivado.
+La integración local posterior conecta la plantilla oficial mediante `templatefile()`
+con cinco parámetros; su SHA-256 coincide con el entregado. Agregar SHA y salida CI
+de esta integración. Falta comprobación funcional del portal; el diagrama y mocks
+son diseño/prueba de código, no evidencia de recursos creados.
 
 ### E03 — Rama, commits y revisión (CE3, CE4)
 
@@ -90,7 +91,8 @@ están declaradas en el código; para mostrar la salida literal `8 passed` adjun
 el log/captura del paso del job o del Git Bash real. No se descargaron logs de
 Actions autenticados ni se inventó su contenido. Los resultados locales nuevos
 en Codex se documentan aparte en VALIDATION.md, incluidos sus bloqueos mTLS.
-Agregar run/checks del futuro SHA lista 8 antes de la ficha final.
+Agregar run/checks del futuro SHA de integración antes de la ficha final, incluyendo
+el paso de integridad/sintaxis de la plantilla y los ocho runs Terraform.
 
 ### E05 — Pipeline, plan y aprobación (CE5)
 

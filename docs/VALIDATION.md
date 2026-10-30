@@ -1,10 +1,69 @@
-# Auditoría y validaciones reales — 24 de octubre de 2026
+# Auditoría y validaciones reales
 
 Zona: America/Santiago. Resultados locales; no son ejecuciones de GitHub Actions.
 Los registros crudos se mantienen en `artifacts/checks/` (ignorado), sujetos a
 revisión antes de usarlos como evidencia. No contienen resultados AWS fabricados.
 
-## Preparación final — estado actual, 24-10-2026
+## Integración del Portal Operacional V1 — 27-10-2026
+
+Base local inspeccionada: `feature/fase1-iac`, HEAD `9f4ceac`; árbol limpio salvo
+los dos materiales oficiales nuevos. `origin/feature/fase1-iac` apunta localmente al
+mismo commit, sin ejecutar fetch/push ni asumir una publicación nueva. La integración
+posterior descrita aquí permanece sin commit y sin CI remoto.
+
+### Material oficial e integración
+
+- `templates/user_data_v1.sh.tpl`: 7774 bytes; SHA-256 comprobado
+  `0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb`.
+  No se modificó su lógica, HTML, CSS ni escapes `$${...}`.
+- `docs/README_ESTUDIANTE.md`: leído completo y conservado sin modificaciones.
+- El root renderiza la ruta fija con `templatefile()` y las cinco claves exactas:
+  `student_name`, `student_number = tostring(var.list_number)`, `environment`,
+  `portal_version = "v1"` y `project_name = "NexoAndes Portal Operacional"`.
+  El resultado se pasa a `module.compute.user_data`; `aws_instance.portal` conserva
+  `user_data_replace_on_change = true`.
+- `student_id` conserva nombres/tags; `student_name` es un input obligatorio distinto.
+  `list_number` sigue siendo la única fuente del número y ahora valida 1–254 según
+  la guía. Default 8 produce `172.16.8.0/24`. `environment` exige `fase1`.
+- Compute conserva endpoint metadata enabled, tokens required, hop limit 1, EBS gp3
+  cifrado, IP pública, subnet y SG recibidos. Security conserva una única entrada
+  pública TCP/80, sin SSH, y egreso TCP/80/443.
+- La AMI por data source continúa siendo AL2023 x86_64, configurable con `ami_id`;
+  región y tipo permanecen obligatorios. La plantilla requiere systemd, curl y
+  dnf/yum/apt. El paquete nginx de AL2023 es compatible con el document root usado;
+  otra familia debe verificarse antes del despliegue.
+
+### Resultados locales de esta integración
+
+| Control | Resultado real |
+|---|---|
+| SHA-256 oficial antes/después | PASS, coincide exactamente |
+| `terraform fmt -check -recursive` | PASS |
+| `terraform validate -no-color` | BLOQUEADO: el proceso no respondió y fue interrumpido tras espera prolongada |
+| `terraform test -no-color` | BLOQUEADO por GetProviderSchema: 0 passed, 2 failed, 6 skipped |
+| Terraform console aislada, sin provider | PASS: renderiza parámetros, `${path}` para Bash y `/health.txt` |
+| Inspección previa de tests | Ambos `.tftest.hcl` usan `mock_provider "aws"`; ocho runs conservados |
+| `scripts/check_repository.py` | PASS |
+| Regresiones Python 3.13 | PASS: 20 tests |
+| TFLint 0.61.0 | PASS inicial; dos repeticiones finales quedaron sin salida y se interrumpieron. El cambio intermedio fue solo validación 1–254 y pasó `terraform fmt` |
+| Checkov 3.2.495, perfil del proyecto | PASS: 10, failed 0, skipped 0 |
+| Git Bash `bash -n templates/user_data_v1.sh.tpl` | PASS |
+| actionlint 1.7.7 sobre CI y candidato disabled | PASS, sin shellcheck externo |
+| `Build-Submission.ps1 -Preview` | PASS: incluye plantilla, README docente y lock; no genera ZIP |
+| Patrones dirigidos de secretos | PASS, sin coincidencias; no sustituye revisión humana |
+| `git diff --check` | PASS |
+
+El primer `bash` resuelto por PATH era WSL y agotó el tiempo al crear su VM; no
+analizó el archivo. Se repitió con `AppData/Local/Programs/Git/bin/bash.exe` y pasó.
+Terraform test volvió a fallar antes de las aserciones porque el provider AWS no
+respondió a GetProviderSchema. Es consistente con el bloqueo x509/mTLS documentado
+en ejecuciones anteriores de este entorno Codex; no se desactivó TLS ni se cambiaron
+certificados. Repetir validate/test desde Git Bash del estudiante antes de CI.
+
+No se ejecutaron plan, apply, destroy, llamadas AWS, escrituras Git/GitHub ni cambios
+en `deploy.yml.disabled`. No hay evidencia de EC2 operativa, HTTP o limpieza.
+
+## Preparación final anterior — histórico del 24-10-2026
 
 Base auditada: `feature/fase1-iac`, árbol inicialmente limpio, HEAD
 `e7f6025bc8fd7e221942c19d3fd0eb579809410b`, cinco commits sobre `main`

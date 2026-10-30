@@ -4,8 +4,9 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$safeRoot = $root -replace '\\', '/'
 Set-Location $root
-$files = & git -c "safe.directory=$root" ls-files --cached --others --exclude-standard
+$files = & git -c "safe.directory=$safeRoot" ls-files --cached --others --exclude-standard
 if($LASTEXITCODE -ne 0){throw 'Cannot obtain repository file list'}
 $allowed = @('.tf','.hcl','.md','.py','.ps1','.sh','.tpl','.yml','.yaml','.txt','.disabled')
 $selected = @($files | Where-Object {

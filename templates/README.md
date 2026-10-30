@@ -1,17 +1,12 @@
-# Dependencia docente pendiente
+# Plantilla oficial del Portal Operacional V1
 
-Aquí se debe incorporar `user_data_v1.sh.tpl` ORIGINAL proporcionado por el docente.
-No se ha recibido y no se incluye un reemplazo. La fixture en `tests/fixtures/`
-solo prueba el renderizado con mocks, no sirve un portal y no es desplegable.
+`user_data_v1.sh.tpl` fue entregada por el docente. SHA-256 verificado:
+`0f06f8f42390f0f38ea7e0587d6bb314caea734aa44a18645b62eaf06ce639fb`.
 
-Antes de planificar: confirmar sistema operativo/arquitectura, variables que
-espera el script, permisos y dependencias de red. Configurar
-`user_data_template_path` y `portal_parameters` según ese contrato real.
-Terraform interpreta `${...}` y `%{...}`: si existen expansiones shell literales,
-escaparlas como `$${...}` y `%%{...}` únicamente donde corresponda, conservando
-la lógica original. Registrar origen, fecha y SHA256 del archivo recibido y
-documentar cada ajuste. No pasar secretos: user_data puede aparecer en state.
+El root la integra directamente mediante `templatefile()` y entrega cinco valores:
+`student_name`, `student_number`, `environment`, `portal_version` y `project_name`.
+No modificar la lógica, HTML, CSS ni las secuencias `$${...}` del archivo oficial.
+El CI comprueba su hash y sintaxis Bash antes de validar Terraform.
 
-Un renderizado vacío, archivo ausente o variable de plantilla faltante bloquea
-la precondición de EC2. Esto no certifica que una plantilla arbitraria sea oficial:
-esa autenticidad debe revisarse en PR antes de habilitar un despliegue.
+La fixture en `tests/fixtures/` sigue siendo exclusiva de pruebas históricas y no
+es un portal desplegable. No pasar secretos: `user_data` puede aparecer en state.

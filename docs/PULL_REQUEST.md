@@ -5,8 +5,10 @@ Auditoría de solo lectura del 24-10-2026: `feature/fase1-iac` en
 [Draft PR #1](https://github.com/JoacoZun/nexoandes-iac-u1/pull/1), abierta hacia
 `main` (`78692328cfa0536fd80334168a27c5fed9790eef`). Creada a las 12:26:12,
 America/Santiago (UTC−03:00). API de reviews: **0 revisiones registradas**.
-La sesión comenzó con working tree limpio; los cambios de preparación de lista 8
-son locales y todavía no forman parte de la PR ni de sus checks aprobados.
+Nueva inspección local del 27-10-2026: HEAD y la referencia remota local de la rama
+apuntan a `9f4ceac`, commit que incorpora lista 8. No se hizo fetch para reafirmar el
+estado actual del servidor. Los dos archivos oficiales y su integración posterior
+son cambios sin commit y no están acreditados por los checks históricos.
 
 No crear una segunda PR, no cambiar a Ready, aprobar, cerrar ni fusionar desde
 esta preparación. `docs/PR_BODY.md` es únicamente una descripción propuesta local;
@@ -21,6 +23,7 @@ no se modificó la descripción remota. La revisión automática no es aprobaci�
 | `3f274f0f54456dc4390cf2dd3c9de916eb504be8` | ci: validación y despliegue desactivado |
 | `1c0966c31ab19b31f6f4a1b71516eaae7da9039f` | docs: arquitectura y evidencias |
 | `e7f6025bc8fd7e221942c19d3fd0eb579809410b` | fix(ci): checksum Linux AWS Provider |
+| `9f4ceac` | feat(iac): estudiante 8 y evidencias U1 |
 
 La comparación `git diff main...HEAD --stat` mostró 46 archivos, 1902 inserciones
 y 25 eliminaciones en la implementación publicada. La API de archivos PR corroboró
@@ -39,14 +42,15 @@ git diff --check
 
 ## Revisión técnica antes de autorizar integración
 
-1. Cotejar el SHA de la PR y el de todos los checks; repetir CI cuando se publiquen
-   los cambios locales de lista 8. Un check de e7f6025 no acredita un diff posterior.
+1. Cotejar el SHA de la PR y el de todos los checks; repetir CI cuando se publique
+   la integración oficial. Un check de e7f6025 no acredita un diff posterior.
 2. Revisar root default 8, subnet 172.16.8.0/24 y parametrización de network con
    otro X; nombres y tags deben compartir student_id y ListNumber.
 3. Cotejar VPC/ruta/asociación, única entrada TCP/80, ausencia de SSH/key pair,
    egreso HTTP/HTTPS, IMDSv2, cifrado y eliminación del volumen raíz.
-4. Verificar contrato, origen y hash de la plantilla docente; no aprobar una fixture
-   de mocks como portal. Confirmar AMI/SO/tipo/región con la guía.
+4. Verificar contrato, origen y SHA-256 `0f06f8...639fb` de la plantilla docente;
+   revisar los cinco parámetros y que el archivo oficial no cambió. Confirmar
+   AMI/SO/tipo/región con la guía y no presentar mocks como portal operativo.
 5. Revisar lock sin hashes manuales ficticios: SHA256 oficiales Linux/Windows y
    `init -lockfile=readonly`. Revisar pruebas negativas y parsers en jobs separados.
 6. Confirmar CI sin credenciales/plan/apply, candidato aún disabled y adaptadores
