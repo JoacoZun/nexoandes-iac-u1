@@ -1,108 +1,87 @@
-# CI/CD candidato y condiciones de activación
+# Pipeline AWS Academy candidato — desactivado
 
-`ci.yml` solo comprueba código; no ejecuta plan/apply/destroy ni recibe credenciales.
-Se dispara por PR a main, push a feature/fase1-iac, dispatch manual o workflow_call.
-La plataforma institucional sigue pendiente: GitHub Actions es una propuesta
-revisable, no una autorización. Adaptar el diseño si la guía requiere otra.
+Estado revisado el 30-10-2026. `.github/workflows/deploy.yml.disabled` permanece
+inerte: GitHub no ejecuta esa extensión. `ci.yml` se conserva intacto y sigue siendo
+la etapa reutilizable de validación. No se ejecutaron operaciones AWS desde esta
+preparación.
 
-`deploy.yml.disabled` no es un workflow activo. Además los dos adaptadores `ci/`
-terminan con error explícito. No basta con renombrar el archivo para desplegar.
+El backend versionado usa S3 con cifrado y bloqueo nativo:
 
-Estado comprobado al 24-10-2026: CI de e7f6025 pasó para push
-[40106088973](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106088973)
-y PR [40106962247](https://github.com/JoacoZun/nexoandes-iac-u1/actions/runs/40106962247),
-con controls y repository-python aprobados en cada ejecución. No se cambian
-triggers ni permisos: contents:read, sin id-token/credenciales ni plan/apply en CI.
-Terraform 1.16.6, provider 6.42.0, acciones por SHA, TFLint/plugin y dependencias
-directas Python están fijados. Las dependencias transitivas pip no son un lock
-hermético. El init Linux readonly pasó en ambos jobs controls; los SHA256 zh de
-Linux/Windows también se cotejaron con el manifiesto oficial de HashiCorp.
-El commit local `9f4ceac` incorpora lista 8. La integración posterior de la plantilla
-oficial requiere su propia corrida futura de CI. El workflow ahora comprueba el hash
-docente y `bash -n` antes de validate; este cambio aún no tiene ejecución remota.
+- bucket: `nexoandes-tfstate-est8-1793333880`;
+- key: `fase1/terraform.tfstate`;
+- región: `us-east-1`;
+- `encrypt = true` y `use_lockfile = true`.
 
-Flujo candidato: dispatch desde main → cinco controles → autenticación temporal
-e init con backend aprobado → plan binario y texto del mismo SHA → artefacto
-inmutable de la misma ejecución → environment con required reviewers → verificación
-de hash/SHA/edad → apply del plan guardado → AWS/HTTP → plan sin cambios → evidencia.
-No hay apply en pushes. Un plan caduca a las cuatro horas; iniciar ejecución nueva
-para volver a planificar y aprobar. No se permiten reruns de una ejecución aprobada.
-Si hay deriva/state alterado o plan obsoleto, fallar y generar nuevo plan, nunca
-regenerarlo silenciosamente en apply. Terraform valida linaje/serial del state.
+El plan real informado previamente fue `11 to add, 0 to change, 0 to destroy`.
+Ese resultado es antecedente; el workflow debe generar, proteger y aprobar su propio
+plan del SHA ejecutado. No reutiliza un plan local ni simula una aprobación.
 
-## Configuración manual requerida antes de habilitar
+## Flujo preparado
 
-1. Recibir guía y autorización expresa para plataforma, cuenta, región, tipo EC2,
-   método de autenticación, backend y despliegue. La plantilla ya está integrada.
-2. Completar variables e indicar un marcador de contenido oficial para
-   `PORTAL_EXPECTED_MARKER`. Pasar las variables no secretas mediante
-   configuración aprobada/TF_VAR; no interpretar contenido externo como código shell.
-3. Reemplazar `ci/institutional-auth.sh` por autenticación temporal aprobada, ejecutada
-   de nuevo en cada job. Si se permite OIDC, restringir trust a repositorio, branch o
-   environment exactos y audience; usar roles separados plan/lectura y apply mínimo.
-   No se han inventado roles, cuentas ni políticas IAM funcionales. El permiso
-   `id-token: write` del candidato no configura por sí mismo confianza ni credenciales.
-   Un `export` dentro del step que hace source no sobrevive automáticamente a los
-   siguientes steps de Actions. La integración autorizada deberá proporcionar
-   credenciales temporales al job (acción institucional o mecanismo aprobado para
-   GITHUB_ENV, sin secretos en logs), además de estar disponibles al init del mismo
-   step. Autenticar cada job por separado; no transferir credenciales en el artefacto
-   del plan. Nada de esto se configura definitivamente antes de recibir la guía.
-4. Reemplazar `ci/institutional-init.sh`: materializar backend autorizado e inicializar
-   **el mismo** estado remoto, cifrado y con locking en plan/apply. Usar
-   `-lockfile=readonly`, restringir acceso al state y verificar cuenta/identidad mediante
-   `aws sts get-caller-identity`. No guardar secretos en backend versionado ni artefactos.
-   Si se autoriza S3, valorar `use_lockfile` con Terraform compatible; no crear S3,
-   DynamoDB ni otro backend sin instrucción institucional. Separar su ciclo de vida.
-5. Crear environment EXACTO `nexoandes-lab-approved` **antes** de activar; exigir
-   required reviewers, impedir autoaprobación, deshabilitar bypass de administradores
-   y limitar despliegue a main. Confirmar que plan/visibilidad de GitHub soporta reglas.
-   Un nombre de environment sin protecciones no constituye un gate. Guardar captura
-   verificable de configuración; si la cuenta no soporta gate, usar mecanismo
-   institucional equivalente y adaptar workflow. No activar con protecciones ausentes.
-6. Proteger main con PR/revisión independiente y controles obligatorios. Revisar
-   cambios a workflows, adaptadores, tests, backend y lock como código privilegiado.
-   Restringir quién puede dispatch/aprobar y acceso a artefactos. Usar `actionlint`
-   para validación semántica adicional del candidato antes de activarlo.
-7. **Resolver privacidad de planes antes de upload**: en repos públicos los artefactos
-   pueden ser accesibles a usuarios con acceso de lectura. Un plan binario puede
-   contener información sensible incluso cuando el texto la oculta. El upload del
-   candidato requiere almacenamiento de acceso restringido aprobado (o repos privado
-   autorizado con controles adecuados). Si no existe, sustituir upload/download por
-   mecanismo institucional protegido; nunca subir planes sensibles a un repos público.
-8. Verificar retención, hashes y permiso del almacén; luego renombrar el candidato a
-   `.yml` mediante PR revisada. La activación no autoriza por sí sola un dispatch.
+1. `controls` llama al workflow CI aprobado.
+2. `plan`, únicamente desde `main` y en el primer intento, valida credenciales
+   temporales, bloqueo público del bucket e inicializa el backend existente.
+3. Terraform genera un plan binario sin imprimirlo en logs. El binario, su texto de
+   revisión y un manifiesto se almacenan con SSE-S3 bajo
+   `fase1/plans/<run-id>/<commit>/`.
+4. El resumen de GitHub muestra solo commit y conteos add/change/destroy. El revisor
+   debe abrir `review.txt` desde S3 con acceso autorizado antes de aprobar.
+5. El job `apply` referencia el Environment `nexoandes-lab-approved`. Sus reglas de
+   required reviewers constituyen el gate real; el nombre YAML por sí solo no basta.
+6. Después del gate se vuelve a autenticar, se descarga el mismo plan y se comprueban
+   SHA-256, manifiesto, commit, cuenta AWS y antigüedad máxima de 45 minutos.
+7. Se inicializa el mismo backend y se aplica exclusivamente el plan guardado.
+8. `Verify-Deployment.ps1` correlaciona outputs, AWS, IMDSv2 e HTTP. Un plan posterior
+   debe devolver exit 0; exit 2 se trata como deriva y falla el job.
+9. El workflow intenta retirar los objetos de plan y diagnósticos locales incluso si
+   falla. Una lifecycle rule S3 es necesaria para ejecuciones canceladas o no aprobadas.
 
-La guía debe confirmar además si AWS Academy Learner Lab [193444] es el laboratorio
-válido y si sus restricciones permiten el mecanismo propuesto. No usar ese número
-como account ID/rol AWS ni asumir que permite crear IAM u OIDC. Siguen pendientes
-región, tipo EC2, identidad académica real, cuenta/roles o sesión temporal autorizada,
-ubicación/cifrado del state, locking, gate y privacidad del plan. El candidato sigue
-disabled y los adaptadores siguen fallando explícitamente.
+No hay `id-token: write`, roles OIDC, access keys permanentes ni `terraform.tfvars`.
+Los adaptadores `ci/institutional-auth.sh` e `institutional-init.sh` continúan
+bloqueados y ya no son invocados por este candidato.
 
-En Learner Lab se debe comprobar, con la sesión autorizada: cuenta y región efectivas;
-tipos EC2/AMI permitidos y cuotas; permisos EC2/VPC/SG/route/IGW; duración y renovación
-de credenciales temporales; prohibiciones IAM/OIDC; servicios disponibles para state
-remoto y locking; persistencia del state entre sesiones; costos/presupuesto; soporte
-de GitHub Actions o runner exigido; y procedimiento institucional de aprobación y
-limpieza. Registrar resultados sin publicar account ID completo, tokens ni secretos.
+## Secrets y variables requeridos
 
-El hash SHA256 esperado pasa por outputs del job plan, separado del archivo descargado;
-el job apply compara hash, commit y antigüedad. El nombre de artefacto incluye run ID
-y SHA; download no busca un artefacto de otra ejecución. El mismo Terraform y provider
-lock se usan en ambos jobs. La concurrencia global evita solapar ejecuciones de este
-workflow, incluso mientras espera aprobación. El backend lock sigue siendo necesario:
-la concurrencia de Actions no coordina operaciones locales u otros workflows.
+El job plan requiere GitHub Repository Secrets actuales:
 
-El revisor debe abrir `review.txt`, cotejar SHA/digest y alcance de recursos, confirmar
-que no hay SSH ni reemplazos/costos inesperados y aprobar en el environment. Registrar
-run ID, aprobador, fecha y hash. Si se cambia configuración/código/state, se requiere
-plan y aprobación nuevos. Los artefactos del candidato duran un día, pero la validez
-del plan es de cuatro horas. Exportar evidencia saneada antes de vencer retención.
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
+- `TF_VAR_STUDENT_ID`
+- `TF_VAR_STUDENT_NAME`
 
-La destrucción es un procedimiento separado y autorizado: plan `-destroy`, revisión
-y gate equivalentes, apply del plan de destrucción aprobado y consulta independiente.
-No se incluye botón de destroy habilitado ni ejecución automática.
+El Environment protegido debe definir nuevamente los mismos Secrets para `apply`.
+Los Secrets del Environment se entregan solo después de la aprobación y pueden
+actualizarse antes de aprobar si la sesión Academy cambió. Nunca imprimirlos, pasarlos
+por outputs ni guardarlos en S3.
 
-Fuentes: [GitHub environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments),
-[HashiCorp saved plans](https://developer.hashicorp.com/terraform/cli/commands/plan).
+El workflow fija como variables no secretas: lista `8`, región `us-east-1`, tipo
+`t3.micro` y marcador oficial del portal. Terraform recibe todo mediante `TF_VAR_*`;
+no lee ni publica `terraform.tfvars`.
+
+## Bloqueos antes de activar
+
+No renombrar el archivo hasta comprobar todos estos puntos:
+
+1. Crear `nexoandes-lab-approved`, exigir al menos un revisor humano distinto del
+   ejecutor, limitar despliegues a `main` y deshabilitar bypass administrativo.
+2. Confirmar que el plan job puede usar los Repository Secrets y que el apply job
+   recibe los Environment Secrets protegidos. Las tres credenciales deben pertenecer
+   a la misma sesión temporal y estar vigentes durante su job.
+3. Confirmar que ambas identidades corresponden a la misma cuenta AWS. Si las
+   credenciales vencen o el gate supera 45 minutos, actualizar Secrets e iniciar una
+   ejecución nueva; no usar rerun sobre un plan anterior.
+4. Verificar permisos mínimos efectivos para STS, EC2/VPC y S3 backend, incluidos
+   `GetObject`, `PutObject` y `DeleteObject` en `fase1/plans/*`, objetos de state/lock
+   y lectura de Public Access Block. Learner Lab puede restringir estas acciones.
+5. Confirmar las cuatro opciones de S3 Block Public Access. Configurar una lifecycle
+   rule que elimine `fase1/plans/` en un máximo de un día. El workflow no altera la
+   configuración del bucket.
+6. Asegurar que solo revisores autorizados puedan leer el texto del plan protegido.
+   No subir plan, state, logs completos ni inventario AWS como GitHub artifacts.
+7. Ejecutar `actionlint` y revisión humana del diff final. Después, activar mediante
+   PR revisada y realizar un nuevo dispatch autorizado desde `main`.
+
+La configuración del Environment, sus reviewers, Secrets, políticas S3 y permisos
+Academy no puede garantizarse desde este archivo desactivado. Hasta comprobarlos,
+el pipeline es diseño preparado y no evidencia CE7 de despliegue efectivo.

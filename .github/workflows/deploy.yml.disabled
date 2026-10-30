@@ -1,5 +1,5 @@
 # CANDIDATO INERTE: GitHub no ejecuta archivos .disabled.
-# Revisar docs/PIPELINE.md y sustituir adaptadores institucionales antes de activar.
+# No renombrar hasta configurar Secrets, Environment protegido y retención S3.
 name: Authorized deployment candidate
 on:
   workflow_dispatch:
@@ -8,9 +8,11 @@ permissions:
 concurrency:
   group: nexoandes-fase1-authorized-state
   cancel-in-progress: false
+
 jobs:
   controls:
     uses: ./.github/workflows/ci.yml
+
   plan:
     needs: controls
     if: github.ref == 'refs/heads/main' && github.run_attempt == 1
@@ -18,85 +20,203 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      id-token: write
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      TF_IN_AUTOMATION: "true"
+      TF_VAR_aws_region: us-east-1
+      TF_VAR_instance_type: t3.micro
+      TF_VAR_list_number: "8"
+      TF_VAR_student_id: ${{ secrets.TF_VAR_STUDENT_ID }}
+      TF_VAR_student_name: ${{ secrets.TF_VAR_STUDENT_NAME }}
+      TF_STATE_BUCKET: nexoandes-tfstate-est8-1793333880
+      TF_PLAN_PREFIX: fase1/plans/${{ github.run_id }}/${{ github.sha }}
     outputs:
-      digest: ${{ steps.bundle.outputs.digest }}
-      created: ${{ steps.bundle.outputs.created }}
+      digest: ${{ steps.protect.outputs.digest }}
+      manifest_digest: ${{ steps.protect.outputs.manifest_digest }}
+      created: ${{ steps.protect.outputs.created }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.sha }}
-      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: 1.16.6
           terraform_wrapper: false
-      - name: Institutional authentication and locked backend (pending)
+      - name: Require temporary credentials and protected inputs
+        shell: bash
         run: |
-          source ci/institutional-auth.sh
-          bash ci/institutional-init.sh
-      - name: Plan exact commit
+          set -euo pipefail
+          for required in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN TF_VAR_student_id TF_VAR_student_name; do
+            test -n "${!required:-}" || { echo "::error::Missing required GitHub Secret: $required"; exit 1; }
+          done
+          aws sts get-caller-identity --no-cli-pager >/dev/null
+          public_block="$(aws s3api get-public-access-block --bucket "$TF_STATE_BUCKET" --query 'PublicAccessBlockConfiguration.[BlockPublicAcls,IgnorePublicAcls,BlockPublicPolicy,RestrictPublicBuckets]' --output text --no-cli-pager)"
+          test "$public_block" = $'True\tTrue\tTrue\tTrue' || { echo '::error::State/plan bucket must block all public access.'; exit 1; }
+      - name: Initialize existing S3 backend with lockfile
+        run: terraform init -input=false -lockfile=readonly -no-color
+      - name: Create saved plan without exposing it in logs
+        shell: bash
         run: |
-          mkdir -p artifacts
-          terraform plan -input=false -lock-timeout=120s -out=artifacts/review.tfplan
-          terraform show -no-color artifacts/review.tfplan > artifacts/review.txt
-          printf '%s\n' "$GITHUB_SHA" > artifacts/commit.txt
-      - name: Bind plan integrity and expiry
-        id: bundle
+          set -euo pipefail
+          umask 077
+          mkdir -p .pipeline
+          if ! terraform plan -input=false -lock-timeout=120s -no-color -out=.pipeline/review.tfplan >.pipeline/plan.log 2>&1; then
+            echo '::error::Terraform plan failed; do not print the protected plan log.'
+            exit 1
+          fi
+          terraform show -no-color .pipeline/review.tfplan > .pipeline/review.txt
+          terraform show -json .pipeline/review.tfplan > .pipeline/review.json
+      - name: Protect plan, review and manifest in S3
+        id: protect
+        shell: bash
         run: |
-          sha256sum artifacts/review.tfplan > artifacts/review.sha256
-          echo "digest=$(sha256sum artifacts/review.tfplan | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-          echo "created=$(date +%s)" >> "$GITHUB_OUTPUT"
-          echo "Review protected plan artifact for commit $GITHUB_SHA before environment approval." >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: reviewed-plan-${{ github.run_id }}-${{ github.sha }}
-          path: artifacts/
-          retention-days: 1
-          if-no-files-found: error
+          set -euo pipefail
+          digest="$(sha256sum .pipeline/review.tfplan | cut -d' ' -f1)"
+          created="$(date +%s)"
+          account="$(aws sts get-caller-identity --query Account --output text --no-cli-pager)"
+          printf 'commit=%s\ncreated=%s\ndigest=%s\naccount=%s\n' "$GITHUB_SHA" "$created" "$digest" "$account" > .pipeline/manifest.txt
+          manifest_digest="$(sha256sum .pipeline/manifest.txt | cut -d' ' -f1)"
+
+          add="$(jq '[.resource_changes[]? | select(.change.actions | index("create"))] | length' .pipeline/review.json)"
+          change="$(jq '[.resource_changes[]? | select(.change.actions == ["update"])] | length' .pipeline/review.json)"
+          destroy="$(jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length' .pipeline/review.json)"
+
+          aws s3 cp .pipeline/review.tfplan "s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/review.tfplan" --sse AES256 --only-show-errors
+          aws s3 cp .pipeline/review.txt "s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/review.txt" --sse AES256 --only-show-errors
+          aws s3 cp .pipeline/manifest.txt "s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/manifest.txt" --sse AES256 --only-show-errors
+
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "manifest_digest=$manifest_digest" >> "$GITHUB_OUTPUT"
+          echo "created=$created" >> "$GITHUB_OUTPUT"
+          {
+            echo '### Protected Terraform plan awaiting approval'
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Summary: **$add to add, $change to change, $destroy to destroy**"
+            echo "- Review object: \`s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/review.txt\`"
+            echo '- The required reviewer must inspect that protected object before approving the Environment.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove protected local plan files
+        if: always()
+        shell: bash
+        run: rm -rf -- .pipeline
+
   apply:
     needs: plan
+    if: github.ref == 'refs/heads/main' && github.run_attempt == 1
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    environment: nexoandes-lab-approved
+    timeout-minutes: 30
+    environment:
+      name: nexoandes-lab-approved
     permissions:
       contents: read
-      id-token: write
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      TF_IN_AUTOMATION: "true"
+      TF_VAR_aws_region: us-east-1
+      TF_VAR_instance_type: t3.micro
+      TF_VAR_list_number: "8"
+      TF_VAR_student_id: ${{ secrets.TF_VAR_STUDENT_ID }}
+      TF_VAR_student_name: ${{ secrets.TF_VAR_STUDENT_NAME }}
+      TF_STATE_BUCKET: nexoandes-tfstate-est8-1793333880
+      TF_PLAN_PREFIX: fase1/plans/${{ github.run_id }}/${{ github.sha }}
+      PORTAL_EXPECTED_MARKER: NexoAndes — Portal Operacional
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.sha }}
-      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: 1.16.6
           terraform_wrapper: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: reviewed-plan-${{ github.run_id }}-${{ github.sha }}
-          path: artifacts
-      - name: Validate approved bytes, commit and age (4 hours)
+      - name: Revalidate temporary credentials after approval
+        shell: bash
+        run: |
+          set -euo pipefail
+          for required in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN TF_VAR_student_id TF_VAR_student_name; do
+            test -n "${!required:-}" || { echo "::error::Missing required protected Secret: $required"; exit 1; }
+          done
+          aws sts get-caller-identity --no-cli-pager >/dev/null
+      - name: Download and validate the exact approved plan
         env:
           EXPECTED_DIGEST: ${{ needs.plan.outputs.digest }}
-          CREATED: ${{ needs.plan.outputs.created }}
+          EXPECTED_MANIFEST_DIGEST: ${{ needs.plan.outputs.manifest_digest }}
+          EXPECTED_CREATED: ${{ needs.plan.outputs.created }}
+        shell: bash
         run: |
-          test "$GITHUB_RUN_ATTEMPT" = 1
-          test "$(cat artifacts/commit.txt)" = "$GITHUB_SHA"
-          test "$(sha256sum artifacts/review.tfplan | cut -d' ' -f1)" = "$EXPECTED_DIGEST"
-          age=$(( $(date +%s) - CREATED ))
-          test "$age" -ge 0 && test "$age" -le 14400
-      - name: Institutional authentication and same locked backend (pending)
+          set -euo pipefail
+          umask 077
+          mkdir -p .pipeline
+          aws s3 cp "s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/review.tfplan" .pipeline/review.tfplan --only-show-errors
+          aws s3 cp "s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/manifest.txt" .pipeline/manifest.txt --only-show-errors
+
+          [[ "$EXPECTED_DIGEST" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_MANIFEST_DIGEST" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_CREATED" =~ ^[0-9]+$ ]]
+          test "$(sha256sum .pipeline/review.tfplan | cut -d' ' -f1)" = "$EXPECTED_DIGEST"
+          test "$(sha256sum .pipeline/manifest.txt | cut -d' ' -f1)" = "$EXPECTED_MANIFEST_DIGEST"
+
+          manifest_commit="$(awk -F= '$1 == "commit" { print $2 }' .pipeline/manifest.txt)"
+          manifest_created="$(awk -F= '$1 == "created" { print $2 }' .pipeline/manifest.txt)"
+          manifest_digest="$(awk -F= '$1 == "digest" { print $2 }' .pipeline/manifest.txt)"
+          manifest_account="$(awk -F= '$1 == "account" { print $2 }' .pipeline/manifest.txt)"
+          current_account="$(aws sts get-caller-identity --query Account --output text --no-cli-pager)"
+
+          test "$manifest_commit" = "$GITHUB_SHA"
+          test "$manifest_created" = "$EXPECTED_CREATED"
+          test "$manifest_digest" = "$EXPECTED_DIGEST"
+          test "$manifest_account" = "$current_account"
+          age=$(( $(date +%s) - EXPECTED_CREATED ))
+          test "$age" -ge 0 && test "$age" -le 2700 || {
+            echo '::error::Approved plan is older than 45 minutes; refresh Academy credentials and start a new run.'
+            exit 1
+          }
+      - name: Initialize the same S3 backend and lockfile
+        run: terraform init -input=false -lockfile=readonly -no-color
+      - name: Apply only the approved saved plan
+        shell: bash
         run: |
-          source ci/institutional-auth.sh
-          bash ci/institutional-init.sh
-      - name: Apply only approved saved plan
-        run: terraform apply -input=false -lock-timeout=120s artifacts/review.tfplan
-      - name: Independent verification
-        run: pwsh -File scripts/Verify-Deployment.ps1 -Region "$TF_VAR_aws_region" -PortalMarker "$PORTAL_EXPECTED_MARKER"
-      - name: Post-apply drift plan
-        run: terraform plan -input=false -detailed-exitcode -lock-timeout=120s -no-color
-      - name: Restricted evidence
+          set -euo pipefail
+          if ! terraform apply -input=false -lock-timeout=120s -no-color .pipeline/review.tfplan >.pipeline/apply.log 2>&1; then
+            echo '::error::Terraform apply failed; do not print the protected apply log.'
+            exit 1
+          fi
+          echo 'Terraform apply completed for the approved saved plan.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Independently verify AWS and the official portal
+        shell: pwsh
+        run: ./scripts/Verify-Deployment.ps1 -Region "$env:TF_VAR_aws_region" -PortalMarker "$env:PORTAL_EXPECTED_MARKER"
+      - name: Require a clean post-apply plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          terraform plan -input=false -detailed-exitcode -lock-timeout=120s -no-color >.pipeline/drift.log 2>&1
+          drift_exit=$?
+          set -e
+          if [ "$drift_exit" -eq 0 ]; then
+            echo 'Post-apply plan: no changes.' >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$drift_exit" -eq 2 ]; then
+            echo '::error::Post-apply drift detected; inspect protected runner diagnostics.'
+            exit 2
+          else
+            echo '::error::Post-apply plan failed.'
+            exit "$drift_exit"
+          fi
+      - name: Remove protected plan objects and local diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: verification-${{ github.run_id }}
-          path: artifacts/verification/
-          retention-days: 1
+        continue-on-error: true
+        shell: bash
+        run: |
+          aws s3 rm "s3://$TF_STATE_BUCKET/$TF_PLAN_PREFIX/" --recursive --only-show-errors
+          rm -rf -- .pipeline artifacts/verification
