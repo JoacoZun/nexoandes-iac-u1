@@ -1,5 +1,3 @@
-# CANDIDATO INERTE: GitHub no ejecuta archivos .disabled.
-# No renombrar hasta configurar Secrets, Environment protegido y retención S3.
 name: Authorized deployment candidate
 on:
   workflow_dispatch:
