@@ -1,0 +1,28 @@
+{
+  "run_id": null,
+  "operation_kind": "update",
+  "region": null,
+  "account_id": null,
+  "asg_name": null,
+  "target_group_arn": null,
+  "endpoint": null,
+  "identity": {
+    "project": "NexoAndes",
+    "phase": "U2",
+    "provider": "aws",
+    "x": null,
+    "student": null,
+    "course": null
+  },
+  "releases": {
+    "v1": {"build_ref": null, "artifact_sha256": null},
+    "v2": {"build_ref": null, "artifact_sha256": null}
+  },
+  "from_version": "v1",
+  "target_version": "v2",
+  "source_launch_template": {"id": null, "version": null},
+  "target_launch_template": {"id": null, "version": null},
+  "base_capacity": null,
+  "temporary_capacity": null,
+  "controller_owner": "terraform_aws_provider"
+}
