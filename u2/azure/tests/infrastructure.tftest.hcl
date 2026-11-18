@@ -47,6 +47,10 @@ run "network_http_and_explicit_egress" {
     condition     = azurerm_network_interface.portal.ip_configuration[0].private_ip_address_allocation == "Dynamic" && azurerm_network_interface.portal.ip_configuration[0].public_ip_address_id == azurerm_public_ip.portal.id
     error_message = "NIC debe recibir IP privada real y asociar salida explícita por IP pública."
   }
+  assert {
+    condition     = toset(azurerm_network_security_rule.http.source_address_prefixes) == toset(var.deployment.allowed_http_cidrs) && azurerm_network_security_rule.deny_other_inbound.destination_port_range == "*" && azurerm_network_security_rule.deny_other_inbound.priority > azurerm_network_security_rule.http.priority && azurerm_network_interface_security_group_association.portal.network_interface_id == azurerm_network_interface.portal.id && azurerm_network_interface_security_group_association.portal.network_security_group_id == azurerm_network_security_group.portal.id
+    error_message = "Los CIDR HTTP y la asociación NSG/NIC deben mantenerse sin apertura administrativa adicional."
+  }
 }
 run "cloud_init_and_no_password" {
   command = plan

@@ -27,8 +27,15 @@ bootstrap por bytes base64 antes del límite EC2 de 16 KiB.
 
 ## Parámetros reales pendientes
 
-X=8 permanece provisional; `x_ratified=false` bloquea infraestructura por
-precondición de VPC. Course y build no tienen valores reales predeterminados.
+Preparación local actual: ver `LOCAL_PARAMETERS.md` y el archivo ignorado
+`deployment.tfvars`. Los valores indicados por el usuario no se han verificado
+en AWS; el objeto permanece incompleto y requiere carga explícita junto con
+la identidad, independientemente de `backend.hcl`.
+
+Los defaults mantienen X=8 provisional y `x_ratified=false`. La configuración
+local explícita `../identity.tfvars` ratifica X=8 por instrucción del usuario y
+usa c50 (sección 50, equivalencia asumida); ver `../IDENTITY.md`.
+Course y build no tienen valores reales predeterminados.
 `deployment` exige cuenta, región, dos AZ, AMI, tipo, nombre de dispositivo raíz,
 tamaño del disco, capacidad base/margen, CIDR HTTP y tiempos de warmup/gracia/drenaje.
 Verificar tamaño mínimo del snapshot raíz, arquitectura y cloud-init/systemd/Python
@@ -69,7 +76,10 @@ capacidad/controlador cada <=30 s. No hay observador ni recuperación ejecutados
 
 ## Protección del state
 
-Backend parcial S3 con cifrado/locking, sin bucket/key/región inventados. La key
+Backend parcial S3 con cifrado/locking, bucket `nexoandes-tfstate-est8-1793333880`
+y región `us-east-1` solicitados; key omitida del bloque versionado y resuelta
+localmente en `backend.hcl` como `u2/c50/a008/aws/terraform.tfstate`. Ver
+`BACKEND.md` para parametrización segura, permisos y verificaciones pendientes. La key
 esperada es `u2/<course>/<student>/aws/terraform.tfstate`, visible en `context`.
 Configurar almacenamiento autorizado y esa key al incorporar pipeline; no usar
 `fase1/terraform.tfstate`, backend de U1 ni migrar/copiar su state. Validar cuenta,

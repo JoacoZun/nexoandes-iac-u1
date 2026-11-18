@@ -1,6 +1,9 @@
 # NexoAndes U2: base local sin cloud
 
 CI exclusiva U2 y validaciones sin cuentas: [CI.md](CI.md).
+Azure se entrega como código sin despliegue por autorización docente de S6
+informada por el usuario: [alcance y límites](azure/EVALUATION.md).
+Azure NO fue desplegado; los resultados mock no son evidencia cloud.
 Observación HTTP/controlador, gates y recuperación preparada sin ejecutar: [observation/README.md](observation/README.md).
 
 **Actualización AWS:** el root de contratos de este directorio conserva su carácter
@@ -30,7 +33,9 @@ lógica. Requiere Linux/cloud-init/Bash/systemd, Python >=3.8, useradd y metadat
 autorizada. Puerto 80 libre: nunca superponer el servicio U1. La plantilla usa
 biblioteca estándar Python; no requiere nginx ni paquetes pip.
 
-`x=8` es provisional heredado de U1; `x_ratified=false`. No se ha confirmado curso.
+Los defaults conservan `x=8` provisional y `x_ratified=false`. La identidad local
+en `identity.tfvars` configura X=8 ratificado por el usuario, a008 derivado y
+c50 (equivalencia asumida con sección 50); no se carga automáticamente.
 `course` es obligatorio cNN; `student` se deriva de X. `build_ref` es obligatorio y
 debe señalar código/artefacto real: el hash no acredita revisión ni despliegue.
 Los valores c99/offline-test en tests son fixtures, no datos académicos.

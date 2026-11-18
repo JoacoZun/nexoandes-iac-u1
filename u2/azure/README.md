@@ -1,4 +1,11 @@
-# Azure U2: infraestructura Terraform sin ejecución cloud
+# Azure U2: entrega de código, sin despliegue
+
+**Excepción docente S6:** el usuario informa que el docente permitió entregar
+Azure como código sin despliegue. Se adopta ese alcance para esta entrega;
+ver [EVALUATION.md](EVALUATION.md). **Azure NO fue desplegado**: no hay evidencia
+Azure real de recursos, endpoint, HTTP, metadata, plan remoto o limpieza.
+Los resultados locales y mocks se identifican como tales, sin sustituirlos por
+ejecuciones ficticias. No es necesario obtener una cuenta Azure para esta entrega.
 
 Root independiente `u2/azure/`, con módulo local `modules/infrastructure` y provider
 `hashicorp/azurerm` exactamente 4.65.0; Terraform >=1.16.6. No modificar/ejecutar el
@@ -9,7 +16,13 @@ root U1 ni AWS para validar este root. Todos los archivos de esta etapa quedan a
 Reutiliza `../` exclusivamente como composición de contratos puros. Azure recibe
 siempre `app_version="v1"`; no hay input que permita seleccionar v2 en este root.
 El módulo también rechaza contratos v2 mediante precondición de la VM.
-X=8 es provisional, `x_ratified=false` bloquea el RG hasta ratificación docente.
+Identidad indicada por el usuario: X=8 ratificado, student=a008 derivado y
+course=c50 (equivalencia asumida con sección 50). El archivo local ignorado
+`../identity.tfvars` contiene esos valores; requiere carga explícita mediante
+`-var-file=../identity.tfvars` en una futura operación autorizada. No se carga
+automáticamente. Los defaults siguen conservadores (`x_ratified=false`).
+El test mock del root comprueba X=8/a008/c50 y su key Azure independiente;
+las pruebas del módulo mantienen c99 como fixture sintética deliberada.
 `course` y `build_ref` son obligatorios y validados por el contrato compartido.
 Prefijo na-u2-cNN-aNNN-az y tags proyecto/fase/alumno/curso/proveedor propagados
 explícitamente donde Azure lo admite; no se presume herencia desde el RG.
@@ -85,11 +98,14 @@ evidencia de despliegue. No ejecutar scripts/workflows de U1 como runner de Azur
 
 ## Pendientes y costos
 
-Ratificar X/curso; autorizar tenant/suscripción/ubicación/imagen/tamaño; validar cuotas,
-clave pública real y permisos; preparar backend externo y pipeline con gate; luego,
-con autorización separada, desplegar v1, verificar API/HTTP/metadata y plan posterior,
-conservar inventario saneado y comprobar limpieza independiente. No se acredita CE3
-ni CE8 operativo por mocks. Azure permanece v1; cambio/recuperación se evalúan en AWS.
+Para la entrega autorizada solo de código: conservar la referencia de clase S6
+en la ficha y vincular código, validaciones offline y CI con el commit evaluado.
+Tenant/suscripción/ubicación/imagen/tamaño, cuotas, clave pública, permisos,
+backend y pipeline de despliegue quedan como requisitos de una eventual operación
+futura, fuera de esta entrega; no se inventan valores para completarlos.
+No se acredita operación Azure por mocks ni se asigna un puntaje de CE3/CE8:
+la valoración de la excepción corresponde al docente. Azure permanece v1;
+cambio/recuperación se evalúan en AWS y no quedan eximidos por esta excepción.
 
 Una ejecución futura puede cobrar VM, disco administrado, Public IP Standard,
 transferencia y almacenamiento del backend. No se asume crédito ni Free Tier.
@@ -101,7 +117,7 @@ Referencias del provider fijado:
 
 Implementación asistida por Codex para código y tests locales; sin operación cloud.
 
-## Resultados de esta preparación
+## Resultados históricos de implementación
 
 - Terraform portátil 1.16.6: fmt/fmt-check PASS, init -backend=false -input=false
   PASS, validate PASS, terraform test: **6 passed, 0 failed**.
@@ -119,3 +135,6 @@ Implementación asistida por Codex para código y tests locales; sin operación 
 
 Estos resultados son validación de código/schemas con recursos simulados. No prueban
 compatibilidad real de una imagen, cuota, permisos, metadata ni disponibilidad HTTP.
+
+La revisión final local del 2026-11-17, identidad X=8/a008/c50 y excepción S6
+se documentan en [EVALUATION.md](EVALUATION.md), con resultados actuales y límites.
