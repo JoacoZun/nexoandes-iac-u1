@@ -1,0 +1,438 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-11-18T15:28:56.294004+00:00",
+  "purpose": "Construcción posterior de ficha PDF; este manifiesto no genera un PDF ni recrea resultados.",
+  "identity": {
+    "student": "a008",
+    "x": 8,
+    "course": "c50",
+    "course_basis": "equivalencia asumida con sección 50"
+  },
+  "evaluated_commit": "dc0f4a0a0f8435db2d164aa325b175ad86134437",
+  "pr_number": 3,
+  "layout": {
+    "image_fit": "contain_no_crop",
+    "keep_results_readable": true,
+    "use_only_paths_in_this_manifest": true,
+    "show_redaction_note": true,
+    "do_not_expand_external_originals": true
+  },
+  "privacy_note": "Las barras negras son redacciones opacas de información personal/identificadores. Resultados técnicos no recreados. Fechas tomadas del contenido cuando existen; nombre de archivo no certifica UTC.",
+  "do_not_claim": [
+    "despliegue Azure",
+    "reemplazo v1→v2 exitoso",
+    "rollback funcional v2→v1",
+    "continuidad absoluta",
+    "limpieza exhaustiva de todas las categorías",
+    "merge/revisión PR no observados"
+  ],
+  "provenance_manifest": {
+    "path": "ASSETS_PROVENANCE.json",
+    "sha256": "ec2d6fe1846722debe36d68718325dee8a7c5976d28b228d9ba1c43cc3c123a9"
+  },
+  "sections": [
+    {
+      "id": "E01",
+      "title": "Arquitectura",
+      "criteria": [
+        "CE1",
+        "CE2"
+      ],
+      "evidence_type": "diagram_from_terraform",
+      "images": [],
+      "cross_references": [],
+      "approved_claim": "AWS desplegado históricamente y posteriormente eliminado; Azure solo código, no desplegado. Relaciones conforme a Terraform.",
+      "limitations": [
+        "Posición EC2 por AZ ilustrativa; no acredita distribución fija ni existencia actual.",
+        "La imagen anterior A01 es borrador: NO usarla."
+      ],
+      "local_sources": [],
+      "diagram": {
+        "preferred_svg": {
+          "path": "E01_arquitectura.svg",
+          "sha256": "97992071d87663a99317da2264379f1e22be7938c1484e693505585c9b2ee038"
+        },
+        "source_mermaid": {
+          "path": "E01_arquitectura.mmd",
+          "sha256": "3be774bdac59791f028f33f2f145b6fa54cd5f4daf77ab82f80011b37094c926"
+        },
+        "fallback_png": {
+          "path": "E01_arquitectura.png",
+          "sha256": "0d20b85bc58f4baaa49a07f161a6ea8be305c00cf919c1179653cbdf7bdbb59b"
+        },
+        "classification": "technical_final_diagram_not_runtime_capture"
+      }
+    },
+    {
+      "id": "E02",
+      "title": "Identidad y backend",
+      "criteria": [
+        "CE3",
+        "CE8"
+      ],
+      "evidence_type": "historical_capture_and_local_configuration",
+      "images": [
+        {
+          "id": "C05",
+          "path": "assets/C05.png",
+          "sha256": "69b0a685207f796d9f27557fee4032de4433dbde40f98acb640660a8c60930c5",
+          "caption": "Portal v1: X=8/a008/c50, build e identidad de un backend; sesión temprana.",
+          "visible_utc": null
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "Identidad observada X=8/a008/c50. Backend AWS U2 configurado con key distinta de U1; Azure usa contexto separado en código.",
+      "limitations": [
+        "c50 es equivalencia asumida con sección 50.",
+        "La captura no prueba política IAM, locking ni configuración efectiva del bucket; no adjuntar state ni credenciales."
+      ],
+      "local_sources": [
+        {
+          "path": "../IDENTITY.md",
+          "sha256": "1aaedb3773f40cc79dffdee2fff1b4ce426554e0746b5bf0cfe0276bbf634349"
+        },
+        {
+          "path": "../aws/BACKEND.md",
+          "sha256": "3f495a9aa6615f41b0982df9556b1bd18f932e61cb167cc05126cfef1fe7a23e"
+        }
+      ]
+    },
+    {
+      "id": "E03",
+      "title": "Plan y despliegue AWS",
+      "criteria": [
+        "CE3",
+        "CE8"
+      ],
+      "evidence_type": "historical_real_capture",
+      "images": [
+        {
+          "id": "C01",
+          "path": "assets/C01.png",
+          "sha256": "e5c9a3569bf0299328a40a6cf5d4f0e6cbf68719a503176dec238f335312f170",
+          "caption": "Plan inicial AWS: 20 altas, 0 cambios, 0 bajas; no prueba apply completo.",
+          "visible_utc": null
+        },
+        {
+          "id": "C02",
+          "path": "assets/C02.png",
+          "sha256": "35a6ec8627de751aecc77d3949308c4c1b5f5ec600161e4d701ad7f45771908c",
+          "caption": "Listado de 20 direcciones Terraform del root AWS U2; no publicar state.",
+          "visible_utc": null
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "Plan inicial de 20 altas y direcciones Terraform del root AWS U2; operación posterior respaldada por ASG/Portal.",
+      "limitations": [
+        "No se localizó cierre completo del apply inicial ni plan posterior; no bloquean armar la ficha con límites explícitos.",
+        "No se acredita despliegue por pipeline U2: las capturas muestran comandos locales."
+      ],
+      "local_sources": []
+    },
+    {
+      "id": "E04",
+      "title": "ASG y Target Group",
+      "criteria": [
+        "CE3",
+        "CE6"
+      ],
+      "evidence_type": "historical_real_capture",
+      "images": [
+        {
+          "id": "C07",
+          "path": "assets/C07.png",
+          "sha256": "d93fdfa7b9acae0b57c98683c476471b1a4f026c4755d7a6c3d6981cc00a4bc8",
+          "caption": "ASG: deseado/min 2, máximo 3, dos InService/Healthy; IDs de sesión temprana.",
+          "visible_utc": null
+        },
+        {
+          "id": "C08",
+          "path": "assets/C08.png",
+          "sha256": "9508fceebb287b9fcb40a0632eb48e37de7979ea1f32cb5a19853ea2fd4c995c",
+          "caption": "ALB activo, listener HTTP:80 y subredes/AZ.",
+          "visible_utc": null
+        },
+        {
+          "id": "C09",
+          "path": "assets/C09.png",
+          "sha256": "d6a733d28c721f5f613e4382e70fce9063531a1c5a4ccf57a39e7ecacc271267",
+          "caption": "Target Group: dos destinos Healthy; IDs de sesión temprana.",
+          "visible_utc": null
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "ASG min/desired=2, max configurado=3; ALB HTTP y dos destinos healthy en la sesión capturada.",
+      "limitations": [
+        "Estado histórico, no consulta actual.",
+        "Las instancias de esta sesión temprana difieren de las del run nocturno; no inferir reemplazo v1→v2."
+      ],
+      "local_sources": []
+    },
+    {
+      "id": "E05",
+      "title": "Portal v1 y HTTP",
+      "criteria": [
+        "CE3",
+        "CE6"
+      ],
+      "evidence_type": "historical_real_capture",
+      "images": [
+        {
+          "id": "C06",
+          "path": "assets/C06.png",
+          "sha256": "50cdef8b0b8ed468f7c187715ab1163b88549603eba8cd88e9dd46fc6f6d4939",
+          "caption": "Comprobación funcional básica y UTC de respuesta/metadata; sesión temprana.",
+          "visible_utc": {
+            "value": "2026-11-17T17:04:20+00:00",
+            "meaning": "Respuesta HTTP visible"
+          }
+        },
+        {
+          "id": "C18",
+          "path": "assets/C18.png",
+          "sha256": "c57485f66e56ca0ad1e4855bf6804a482940c2055098667e455872e1432cdb44",
+          "caption": "GET /api/check: HTTP 200, v1, passed=true, a008/c50, hash/build; UTC HTTP 2026-11-18T01:29:27Z.",
+          "visible_utc": {
+            "value": "2026-11-18T01:29:27+00:00",
+            "meaning": "Cabecera HTTP Date"
+          }
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "Portal v1 con función básica correcta; GET /api/check posterior devuelve HTTP 200, passed=true e identidad/build/hash visibles.",
+      "limitations": [
+        "C06 y C18 corresponden a momentos distintos; C18 es posterior a la recuperación de configuración.",
+        "Se conserva C03 en reserva: timeout inicial. No ocultar ese fallo ni afirmar continuidad absoluta.",
+        "/health solo acredita proceso."
+      ],
+      "local_sources": []
+    },
+    {
+      "id": "E06",
+      "title": "Experimento v1→v2 bloqueado por SCP",
+      "criteria": [
+        "CE4",
+        "CE5",
+        "CE6",
+        "CE8"
+      ],
+      "evidence_type": "incident",
+      "images": [
+        {
+          "id": "C11",
+          "path": "assets/C11.png",
+          "sha256": "47f7ed9efea5ef7c34e6344403f1a95a342d8d5a51002e6872973f8b09556900",
+          "caption": "BASELINE READY a 2026-11-17T23:27:52.208+00:00; no prueba actualización.",
+          "visible_utc": {
+            "value": "2026-11-17T23:27:52.208+00:00",
+            "meaning": "Gate BASELINE READY"
+          }
+        },
+        {
+          "id": "C13",
+          "path": "assets/C13.png",
+          "sha256": "06b88b595f4231665b14be3b3ac527a5d8da7a07ce6c129839db2151cc830eb0",
+          "caption": "Plan v2: 0 altas, 2 cambios, 0 bajas; plan guardado, no reemplazo realizado.",
+          "visible_utc": null
+        },
+        {
+          "id": "C15",
+          "path": "assets/C15.png",
+          "sha256": "59c148c9ffa2d0bf07c184f8892fe631d995400ee044ec4b28373ad22712dd42",
+          "caption": "INC-U2-001: LT modificada y StartInstanceRefresh HTTP 403, explicit deny SCP.",
+          "visible_utc": {
+            "value": "2026-11-17T23:40:37.975+00:00",
+            "meaning": "Baseline previo visible; NO hora exacta del rechazo SCP"
+          }
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "INC-U2-001: baseline aprobado, plan v2 preparado y StartInstanceRefresh denegado con HTTP 403 por explicit deny en SCP.",
+      "limitations": [
+        "NO reemplazo v1→v2 exitoso; NO refresh iniciado demostrado.",
+        "Los logs de control tuvieron tres TimeoutExpired y los monitores finalizaron sin ventana completa.",
+        "No se fabrican eventos change_started/stabilized ni informe accepted=true."
+      ],
+      "local_sources": []
+    },
+    {
+      "id": "E07",
+      "title": "Recuperación de configuración v1",
+      "criteria": [
+        "CE7",
+        "CE8"
+      ],
+      "evidence_type": "historical_recovery_of_configuration",
+      "images": [
+        {
+          "id": "C16",
+          "path": "assets/C16.png",
+          "sha256": "92b5e7cad49ef2393b646048b050eb34f19c179edc1b18db37f1dd898b9050eb",
+          "caption": "Plan de recuperación de configuración v1/refresh=false: 0 altas, 2 cambios, 0 bajas.",
+          "visible_utc": null
+        },
+        {
+          "id": "C17",
+          "path": "assets/C17.png",
+          "sha256": "521c6e8056be6257fe9e23c7bf74be6b4297c14f9f13386371b7edb47462129b",
+          "caption": "ASG apunta a LT v3; deseado 2 y dos instancias LT v1 Healthy/InService. No prueba reemplazo.",
+          "visible_utc": null
+        }
+      ],
+      "cross_references": [
+        "E05:C18"
+      ],
+      "approved_claim": "Plan de retorno a configuración v1/refresh=false; ASG apunta a LT v3, con dos instancias LT v1 Healthy/InService. HTTP v1 posterior en C18.",
+      "limitations": [
+        "NO rollback funcional v2→v1: las instancias originales no pasaron por v2.",
+        "No se localizó log completo de apply de recuperación ni plan posterior; declarar la limitación sin recrearlos."
+      ],
+      "local_sources": []
+    },
+    {
+      "id": "E08",
+      "title": "Limpieza AWS",
+      "criteria": [
+        "CE8"
+      ],
+      "evidence_type": "historical_real_capture",
+      "images": [
+        {
+          "id": "C19",
+          "path": "assets/C19.png",
+          "sha256": "6063ef1566076b1e3eebcb5ff5c14fadbc3218141d2d9b9d23e6e53e88d6cc9b",
+          "caption": "Plan de limpieza: 0 altas, 0 cambios y 20 bajas; intención, no limpieza por sí sola.",
+          "visible_utc": null
+        },
+        {
+          "id": "C20",
+          "path": "assets/C20.png",
+          "sha256": "b60a1a434baddb169b12c7e6b50cb1ce895f87686f1dab02f10843999d8d2ccb",
+          "caption": "Salida Destroy complete! Resources: 20 destroyed.; resultado Terraform fotografiado.",
+          "visible_utc": null
+        },
+        {
+          "id": "C21",
+          "path": "assets/C21.png",
+          "sha256": "6f21d08ac80ebbf0b429b747999f7df5a714f7dfee852f2b7e7cec632860f1c6",
+          "caption": "Consultas posteriores: ASG U2=0, ALB U2=[], VPC U2=0; cobertura limitada a esas consultas.",
+          "visible_utc": null
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "Plan de 20 bajas, Terraform informa 20 recursos destruidos y consultas posteriores sin ASG, ALB ni VPC U2.",
+      "limitations": [
+        "No demuestra ausencia global de recursos ni limpieza de todas las categorías.",
+        "Faltan state list vacío y consultas de EC2/EBS/TG/LT; no ejecutar cloud para completar la ficha.",
+        "No afirmar eliminación del bucket compartido o state U1."
+      ],
+      "local_sources": []
+    },
+    {
+      "id": "E09",
+      "title": "Azure validado solo como código",
+      "criteria": [
+        "CE1",
+        "CE2",
+        "CE3",
+        "CE4",
+        "CE8"
+      ],
+      "evidence_type": "local_mock_and_teacher_exception",
+      "images": [],
+      "cross_references": [
+        "E10:C22"
+      ],
+      "approved_claim": "Azure NO desplegado. Excepción docente S6 informada por el usuario; código, Portal v1 y validaciones offline documentados en el commit evaluado.",
+      "limitations": [
+        "No hay captura específica localizada de validate/seis mocks: usar texto/documentación real, sin crear una falsa consola.",
+        "Referencia escrita S6 no aportada; no inventar acta.",
+        "El puntaje y aceptación de evidencia equivalente corresponden al docente."
+      ],
+      "local_sources": [
+        {
+          "path": "../azure/EVALUATION.md",
+          "sha256": "885f0d77bbd226683e8e3b652df8f948be0cf7ffbc67ba90c4030396689bc38f"
+        },
+        {
+          "path": "../azure/README.md",
+          "sha256": "316079fa3188fef5c505f4646f0e358c8bc5501cf2cd46b27ad9ffc180f23083"
+        },
+        {
+          "path": "../azure/tests/root.tftest.hcl",
+          "sha256": "accb17aa2d62ce640585d4db23902befae9500eb675a19f7e0905b0662f836cd"
+        },
+        {
+          "path": "../azure/tests/infrastructure.tftest.hcl",
+          "sha256": "a0827df056ffee6dde417697e57d5b630d1eeecea1f77251d8b0c057537e1bc5"
+        }
+      ]
+    },
+    {
+      "id": "E10",
+      "title": "GitHub CI dc0f4a0 y PR #3",
+      "criteria": [
+        "CE8"
+      ],
+      "evidence_type": "historical_real_capture",
+      "images": [
+        {
+          "id": "C22",
+          "path": "assets/C22.png",
+          "sha256": "2919ec7af7e8c220522ff79bb5f3ae994ade2ec5090fc878c230c2341e149ac7",
+          "caption": "GitHub Actions: U2 controls #4 para dc0f4a0 y #5 para PR #3 verdes; también control U1 #17. No prueba merge.",
+          "visible_utc": null
+        }
+      ],
+      "cross_references": [],
+      "approved_claim": "Captura GitHub: U2 offline controls #4 para dc0f4a0 y #5 para PR #3 verdes.",
+      "limitations": [
+        "No acredita aprobación humana ni merge del PR.",
+        "No se localizaron URLs/IDs completos de runs ni detalle de cada job; no inventarlos.",
+        "Los assets/manifiesto actuales son posteriores al commit dc0f4a0."
+      ],
+      "local_sources": []
+    }
+  ],
+  "reserve_images": [
+    {
+      "id": "C03",
+      "path": "assets/C03.png",
+      "sha256": "71abf7b909c637f0389cf3d1d4deb276b0b0ad07a8230dd01474010a3b3385a8",
+      "reason": "Fallo inicial conservado y mencionado en E05; disponible si la ficha necesita anexo."
+    },
+    {
+      "id": "C04",
+      "path": "assets/C04.png",
+      "sha256": "f5251214377ab4f19095642f62ec75869dad2921fc9c87ca92cb9eccd87439f8",
+      "reason": "Salud de proceso, inferior a /api/check para demostrar función."
+    },
+    {
+      "id": "C10",
+      "path": "assets/C10.png",
+      "sha256": "8a3022330428c026e3ceb35ae38452956a8210c54f6400f84dcb0b8d20275a41",
+      "reason": "ASG redundante respecto a C07/C09."
+    },
+    {
+      "id": "C12",
+      "path": "assets/C12.png",
+      "sha256": "caae0ac4ea067fc353953294971713da462ed3492f24b354a3cef7a5fc957c9e",
+      "reason": "Segundo baseline, redundante respecto a C11."
+    },
+    {
+      "id": "C14",
+      "path": "assets/C14.png",
+      "sha256": "27cf5d23f39c57c63b33a3d3b50ae15f057e398288fe5fabd86dde93d5040659",
+      "reason": "Detalle de plan redundante respecto a C13; IDs redactados."
+    }
+  ],
+  "historical_missing_not_blocking": [
+    "diagrama/inputs no son ejecución",
+    "cierre apply inicial",
+    "apply recuperación y plan posterior",
+    "verificación limpieza por categorías restantes",
+    "captura terminal Azure específica",
+    "referencia escrita clase S6",
+    "URLs/IDs completos de CI y revisión PR"
+  ]
+}
