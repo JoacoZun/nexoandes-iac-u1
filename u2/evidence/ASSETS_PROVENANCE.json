@@ -1,0 +1,1385 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-11-18T15:26:23.199304+00:00",
+  "source_index": "EVIDENCE_INDEX.md",
+  "privacy": "Only sanitized assets may enter the PDF. Original paths remain in the private working index; filenames/hashes trace provenance. Raw recognized text is not stored.",
+  "source_root_resolution": "external_screenshots = originales externos conservados privadamente, no distribuidos; nombres y hashes en records; enlaces públicos solo a assets saneados",
+  "records": [
+    {
+      "id": "C01",
+      "source_filename": "Captura de pantalla 2026-11-17 135201.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "0a848c6954fcc998f623591320aaa298c8e247c10130236e06a1cd262a1ec332",
+      "source_filename_local_time": "2026-11-17 135201",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T16:52:02.521786+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C01.png",
+      "asset_sha256": "e5c9a3569bf0299328a40a6cf5d4f0e6cbf68719a503176dec238f335312f170",
+      "asset_bytes": 13377,
+      "width": 625,
+      "height": 311,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3"
+      ],
+      "index_groups": "E03",
+      "claim": "Plan inicial AWS: 20 altas, 0 cambios, 0 bajas; no prueba apply completo.",
+      "type": "historical_real_capture",
+      "redactions": [],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C02",
+      "source_filename": "Captura de pantalla 2026-11-17 135945.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "faceae591d008ff008274bf5cad42c12e2364315ef92c117be8a5d9352b2f0b3",
+      "source_filename_local_time": "2026-11-17 135945",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T16:59:45.551269+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C02.png",
+      "asset_sha256": "35a6ec8627de751aecc77d3949308c4c1b5f5ec600161e4d701ad7f45771908c",
+      "asset_bytes": 32859,
+      "width": 664,
+      "height": 406,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3",
+        "CE8"
+      ],
+      "index_groups": "E03",
+      "claim": "Listado de 20 direcciones Terraform del root AWS U2; no publicar state.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            664,
+            18
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            450,
+            359,
+            663,
+            379
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            15,
+            8,
+            56,
+            25
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            0,
+            0,
+            664,
+            24
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C03",
+      "source_filename": "Captura de pantalla 2026-11-17 140231.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "54204b96070bc92e792b5e20fc8bc8388af8ca4cd425f88d8166766157726444",
+      "source_filename_local_time": "2026-11-17 140231",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:02:31.835356+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C03.png",
+      "asset_sha256": "71abf7b909c637f0389cf3d1d4deb276b0b0ad07a8230dd01474010a3b3385a8",
+      "asset_bytes": 15896,
+      "width": 853,
+      "height": 524,
+      "selected_for_pdf": false,
+      "criteria": [
+        "CE3",
+        "CE6"
+      ],
+      "index_groups": "E05",
+      "claim": "Timeout del navegador al ALB; conservar como fallo inicial, no como éxito.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            108,
+            208,
+            704,
+            229
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            103,
+            209,
+            586,
+            224
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C04",
+      "source_filename": "Captura de pantalla 2026-11-17 140318.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "67602ce24ddcc9a654ae2f837bf86206f38544d7f3efed3621356ad966b05901",
+      "source_filename_local_time": "2026-11-17 140318",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:03:18.496403+00:00",
+      "visible_utc": {
+        "value": "2026-11-17T17:03:13+00:00",
+        "meaning": "observed_utc de salud de proceso"
+      },
+      "asset_path": "assets/C04.png",
+      "asset_sha256": "f5251214377ab4f19095642f62ec75869dad2921fc9c87ca92cb9eccd87439f8",
+      "asset_bytes": 5615,
+      "width": 446,
+      "height": 287,
+      "selected_for_pdf": false,
+      "criteria": [
+        "CE3"
+      ],
+      "index_groups": "E05",
+      "claim": "JSON de salud de proceso v1; no equivale a comprobación funcional completa.",
+      "type": "historical_real_capture",
+      "redactions": [],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C05",
+      "source_filename": "Captura de pantalla 2026-11-17 140436.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "14a3823abaa7bafc3440f6e47205b59e4bad531a0fb3a5adfbd51a9298c1a2c1",
+      "source_filename_local_time": "2026-11-17 140436",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:04:37.180934+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C05.png",
+      "asset_sha256": "69b0a685207f796d9f27557fee4032de4433dbde40f98acb640660a8c60930c5",
+      "asset_bytes": 44830,
+      "width": 1247,
+      "height": 674,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3",
+        "CE8"
+      ],
+      "index_groups": "E02/E05",
+      "claim": "Portal v1: X=8/a008/c50, build e identidad de un backend; sesión temprana.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            212,
+            8,
+            1153,
+            36
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            683,
+            444,
+            869,
+            466
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            683,
+            601,
+            815,
+            620
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            683,
+            653,
+            832,
+            674
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            683,
+            654,
+            784,
+            673
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C06",
+      "source_filename": "Captura de pantalla 2026-11-17 140450.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "8e0ff1fae44e6ababdff77836613815fb40f5f26faa0728839d6c3db6e8fb264",
+      "source_filename_local_time": "2026-11-17 140450",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:04:50.964950+00:00",
+      "visible_utc": {
+        "value": "2026-11-17T17:04:20+00:00",
+        "meaning": "Respuesta HTTP visible"
+      },
+      "asset_path": "assets/C06.png",
+      "asset_sha256": "50cdef8b0b8ed468f7c187715ab1163b88549603eba8cd88e9dd46fc6f6d4939",
+      "asset_bytes": 36792,
+      "width": 1168,
+      "height": 630,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3"
+      ],
+      "index_groups": "E05",
+      "claim": "Comprobación funcional básica y UTC de respuesta/metadata; sesión temprana.",
+      "type": "historical_real_capture",
+      "redactions": [],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C07",
+      "source_filename": "Captura de pantalla 2026-11-17 140718.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "f77ea8fa36d574f0a2c4938b3ed0b119be0b1aea51082a1bf0545687b1d8d332",
+      "source_filename_local_time": "2026-11-17 140718",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:07:19.237656+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C07.png",
+      "asset_sha256": "d93fdfa7b9acae0b57c98683c476471b1a4f026c4755d7a6c3d6981cc00a4bc8",
+      "asset_bytes": 45547,
+      "width": 1123,
+      "height": 522,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3",
+        "CE6"
+      ],
+      "index_groups": "E04",
+      "claim": "ASG: deseado/min 2, máximo 3, dos InService/Healthy; IDs de sesión temprana.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            47,
+            438,
+            172,
+            489
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            424,
+            115,
+            633,
+            135
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            606,
+            438,
+            730,
+            489
+          ],
+          "reason": "privacy_manual_review"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C08",
+      "source_filename": "Captura de pantalla 2026-11-17 141133.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "61768ea7f4cb615e69c5ffb25604bb5cdbaa9502717987e3acd462f6e65cfb05",
+      "source_filename_local_time": "2026-11-17 141133",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:11:34.134435+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C08.png",
+      "asset_sha256": "9508fceebb287b9fcb40a0632eb48e37de7979ea1f32cb5a19853ea2fd4c995c",
+      "asset_bytes": 65367,
+      "width": 1152,
+      "height": 521,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE1",
+        "CE3"
+      ],
+      "index_groups": "E04",
+      "claim": "ALB activo, listener HTTP:80 y subredes/AZ.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            25,
+            206,
+            574,
+            238
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            607,
+            206,
+            1134,
+            225
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            307,
+            136,
+            411,
+            154
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            590,
+            91,
+            731,
+            108
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            590,
+            137,
+            732,
+            154
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            590,
+            157,
+            732,
+            174
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            590,
+            139,
+            694,
+            153
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C09",
+      "source_filename": "Captura de pantalla 2026-11-17 141152.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "78c70249473348ae786f36c1590609fdca82357dda4bdffc3b2e02aa05d9a502",
+      "source_filename_local_time": "2026-11-17 141152",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T17:11:52.820829+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C09.png",
+      "asset_sha256": "d6a733d28c721f5f613e4382e70fce9063531a1c5a4ccf57a39e7ecacc271267",
+      "asset_bytes": 64229,
+      "width": 1106,
+      "height": 545,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3",
+        "CE6"
+      ],
+      "index_groups": "E04",
+      "claim": "Target Group: dos destinos Healthy; IDs de sesión temprana.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            43,
+            60,
+            511,
+            79
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            826,
+            95,
+            960,
+            115
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            61,
+            466,
+            188,
+            510
+          ],
+          "reason": "privacy_manual_review"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C10",
+      "source_filename": "Captura de pantalla 2026-11-17 201512.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "924947d61ca0df4c9530b3e1f4d988780e610275eb6e3c81354ce01a06361b4c",
+      "source_filename_local_time": "2026-11-17 201512",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T23:15:13.246011+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C10.png",
+      "asset_sha256": "8a3022330428c026e3ceb35ae38452956a8210c54f6400f84dcb0b8d20275a41",
+      "asset_bytes": 29980,
+      "width": 1043,
+      "height": 262,
+      "selected_for_pdf": false,
+      "criteria": [
+        "CE3",
+        "CE6"
+      ],
+      "index_groups": "E04",
+      "claim": "Consulta ASG: dos Healthy/InService en us-east-1a y us-east-1b.",
+      "type": "historical_real_capture",
+      "redactions": [],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C11",
+      "source_filename": "Captura de pantalla 2026-11-17 202900.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "3d0b562a31f5fbd0bbfeaebcb63b3aa2b2e5e57867edc518044b147ae2dd0485",
+      "source_filename_local_time": "2026-11-17 202900",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T23:29:00.822409+00:00",
+      "visible_utc": {
+        "value": "2026-11-17T23:27:52.208+00:00",
+        "meaning": "Gate BASELINE READY"
+      },
+      "asset_path": "assets/C11.png",
+      "asset_sha256": "47f7ed9efea5ef7c34e6344403f1a95a342d8d5a51002e6872973f8b09556900",
+      "asset_bytes": 9115,
+      "width": 785,
+      "height": 150,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE6"
+      ],
+      "index_groups": "E06",
+      "claim": "BASELINE READY a 2026-11-17T23:27:52.208+00:00; no prueba actualización.",
+      "type": "incident",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            785,
+            17
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            3,
+            1,
+            44,
+            18
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C12",
+      "source_filename": "Captura de pantalla 2026-11-17 203628.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "358fc44d5676c4048e6a0f12fccd7bd4c2b36f6d3bb0fd5d19e268f4eb335067",
+      "source_filename_local_time": "2026-11-17 203628",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T23:36:29.143437+00:00",
+      "visible_utc": {
+        "value": "2026-11-17T23:36:09.160+00:00",
+        "meaning": "Gate BASELINE READY"
+      },
+      "asset_path": "assets/C12.png",
+      "asset_sha256": "caae0ac4ea067fc353953294971713da462ed3492f24b354a3cef7a5fc957c9e",
+      "asset_bytes": 20825,
+      "width": 786,
+      "height": 291,
+      "selected_for_pdf": false,
+      "criteria": [
+        "CE6"
+      ],
+      "index_groups": "E06",
+      "claim": "Segundo gate baseline a 2026-11-17T23:36:09.160+00:00 y parámetros del experimento.",
+      "type": "incident",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            786,
+            35
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            3,
+            2,
+            44,
+            19
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            102,
+            19,
+            144,
+            36
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C13",
+      "source_filename": "Captura de pantalla 2026-11-17 203707.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "ab471fa7560a2a9dafb8626d09badd03c1a7945c4941d5a9ea7ef607cc8666e7",
+      "source_filename_local_time": "2026-11-17 203707",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T23:37:07.901048+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C13.png",
+      "asset_sha256": "06b88b595f4231665b14be3b3ac527a5d8da7a07ce6c129839db2151cc830eb0",
+      "asset_bytes": 17554,
+      "width": 670,
+      "height": 322,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE4",
+        "CE6"
+      ],
+      "index_groups": "E06",
+      "claim": "Plan v2: 0 altas, 2 cambios, 0 bajas; plan guardado, no reemplazo realizado.",
+      "type": "incident",
+      "redactions": [],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C14",
+      "source_filename": "Captura de pantalla 2026-11-17 203924.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "181aba7e1c82ba9b531f3881f81340e33bc2e6dd50272ede7b3cf3518afea414",
+      "source_filename_local_time": "2026-11-17 203924",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T23:39:24.793912+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C14.png",
+      "asset_sha256": "27cf5d23f39c57c63b33a3d3b50ae15f057e398288fe5fabd86dde93d5040659",
+      "asset_bytes": 29449,
+      "width": 869,
+      "height": 426,
+      "selected_for_pdf": false,
+      "criteria": [
+        "CE4",
+        "CE6"
+      ],
+      "index_groups": "E06",
+      "claim": "Inspección del plan: LT/ASG y preferencias refresh; no prueba ejecución exitosa.",
+      "type": "incident",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            869,
+            18
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            112,
+            361,
+            869,
+            412
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            7,
+            10,
+            48,
+            27
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            0,
+            0,
+            869,
+            24
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C15",
+      "source_filename": "Captura de pantalla 2026-11-17 204619.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "13a853258ccc47eaf2cb09179e26730a9471d3f3581e9be6de3d713c779f4ae7",
+      "source_filename_local_time": "2026-11-17 204619",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-17T23:46:20.328032+00:00",
+      "visible_utc": {
+        "value": "2026-11-17T23:40:37.975+00:00",
+        "meaning": "Baseline previo visible; NO hora exacta del rechazo SCP"
+      },
+      "asset_path": "assets/C15.png",
+      "asset_sha256": "59c148c9ffa2d0bf07c184f8892fe631d995400ee044ec4b28373ad22712dd42",
+      "asset_bytes": 39677,
+      "width": 865,
+      "height": 501,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE5",
+        "CE6",
+        "CE8"
+      ],
+      "index_groups": "E06",
+      "claim": "INC-U2-001: LT modificada y StartInstanceRefresh HTTP 403, explicit deny SCP.",
+      "type": "incident",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            865,
+            35
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            491,
+            237,
+            634,
+            253
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            634,
+            254,
+            768,
+            271
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            425,
+            321,
+            682,
+            337
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            0,
+            339,
+            597,
+            357
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            270,
+            356,
+            865,
+            374
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            0,
+            373,
+            353,
+            391
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            758,
+            373,
+            865,
+            391
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            0,
+            390,
+            865,
+            408
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            10,
+            1,
+            51,
+            18
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            109,
+            18,
+            151,
+            35
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            423,
+            324,
+            680,
+            340
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            44,
+            393,
+            134,
+            406
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C16",
+      "source_filename": "Captura de pantalla 2026-11-17 211915.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "d37bc07e6cc494cb3199c153667c4118d6c5a8a2d3e2cc5c1bf7d9560f701ad2",
+      "source_filename_local_time": "2026-11-17 211915",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T00:19:15.618067+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C16.png",
+      "asset_sha256": "92b5e7cad49ef2393b646048b050eb34f19c179edc1b18db37f1dd898b9050eb",
+      "asset_bytes": 24849,
+      "width": 688,
+      "height": 355,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE7"
+      ],
+      "index_groups": "E07",
+      "claim": "Plan de recuperación de configuración v1/refresh=false: 0 altas, 2 cambios, 0 bajas.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            688,
+            18
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            6,
+            4,
+            47,
+            21
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            0,
+            0,
+            688,
+            24
+          ],
+          "reason": "visual_review_followup"
+        },
+        {
+          "box_xyxy": [
+            516,
+            173,
+            687,
+            192
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C17",
+      "source_filename": "Captura de pantalla 2026-11-17 214951.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "af7ece6467648ac1fc12662a3febd0d441ce86f4038917195c9b0a3c6d495b8d",
+      "source_filename_local_time": "2026-11-17 214951",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T00:49:51.430420+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C17.png",
+      "asset_sha256": "521c6e8056be6257fe9e23c7bf74be6b4297c14f9f13386371b7edb47462129b",
+      "asset_bytes": 18790,
+      "width": 865,
+      "height": 408,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE7"
+      ],
+      "index_groups": "E07",
+      "claim": "ASG apunta a LT v3; deseado 2 y dos instancias LT v1 Healthy/InService. No prueba reemplazo.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            865,
+            18
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            4,
+            8,
+            45,
+            25
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            0,
+            0,
+            865,
+            24
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C18",
+      "source_filename": "Captura de pantalla 2026-11-17 222935.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "b4462c79b19f9ab8a6dcaf4c8e51cd6770286c2dde596c21bb7372a22cdeb861",
+      "source_filename_local_time": "2026-11-17 222935",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T01:29:35.855023+00:00",
+      "visible_utc": {
+        "value": "2026-11-18T01:29:27+00:00",
+        "meaning": "Cabecera HTTP Date"
+      },
+      "asset_path": "assets/C18.png",
+      "asset_sha256": "c57485f66e56ca0ad1e4855bf6804a482940c2055098667e455872e1432cdb44",
+      "asset_bytes": 30458,
+      "width": 873,
+      "height": 329,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE3",
+        "CE7"
+      ],
+      "index_groups": "E05/E07",
+      "claim": "GET /api/check: HTTP 200, v1, passed=true, a008/c50, hash/build; UTC HTTP 2026-11-18T01:29:27Z.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            873,
+            20
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            33,
+            40,
+            521,
+            57
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            505,
+            244,
+            662,
+            263
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            110,
+            262,
+            213,
+            280
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            327,
+            262,
+            447,
+            280
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            11,
+            8,
+            52,
+            25
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            522,
+            246,
+            659,
+            262
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            0,
+            0,
+            873,
+            24
+          ],
+          "reason": "visual_review_followup"
+        },
+        {
+          "box_xyxy": [
+            293,
+            262,
+            448,
+            280
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C19",
+      "source_filename": "Captura de pantalla 2026-11-17 223147.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "53986b3eaf4f92191c29404a740f1ae91a893013ddde6ab5d7540e71664511a7",
+      "source_filename_local_time": "2026-11-17 223147",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T01:31:47.801763+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C19.png",
+      "asset_sha256": "6063ef1566076b1e3eebcb5ff5c14fadbc3218141d2d9b9d23e6e53e88d6cc9b",
+      "asset_bytes": 46389,
+      "width": 839,
+      "height": 502,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE8"
+      ],
+      "index_groups": "E08",
+      "claim": "Plan de limpieza: 0 altas, 0 cambios y 20 bajas; intención, no limpieza por sí sola.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            839,
+            35
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            2,
+            3,
+            43,
+            20
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            101,
+            20,
+            143,
+            37
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            500,
+            442,
+            645,
+            463
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C20",
+      "source_filename": "Captura de pantalla 2026-11-17 223629.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "ae129dba849f6cc7043617503fa822303b8533eeb3ecb36193f38350642e6785",
+      "source_filename_local_time": "2026-11-17 223629",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T01:36:30.076591+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C20.png",
+      "asset_sha256": "b60a1a434baddb169b12c7e6b50cb1ce895f87686f1dab02f10843999d8d2ccb",
+      "asset_bytes": 51129,
+      "width": 869,
+      "height": 500,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE8"
+      ],
+      "index_groups": "E08",
+      "claim": "Salida Destroy complete! Resources: 20 destroyed.; resultado Terraform fotografiado.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            426,
+            0,
+            869,
+            19
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            0,
+            18,
+            388,
+            35
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            391,
+            2,
+            865,
+            19
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            454,
+            104,
+            599,
+            121
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            489,
+            172,
+            641,
+            189
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            454,
+            189,
+            606,
+            206
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            531,
+            274,
+            682,
+            291
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            454,
+            308,
+            627,
+            325
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            454,
+            325,
+            627,
+            342
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            454,
+            342,
+            599,
+            359
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            398,
+            427,
+            550,
+            444
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            427,
+            237,
+            869,
+            255
+          ],
+          "reason": "visual_review_followup"
+        },
+        {
+          "box_xyxy": [
+            0,
+            254,
+            151,
+            273
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C21",
+      "source_filename": "Captura de pantalla 2026-11-17 223734.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "1b6f5a9fae6e0f680ffac3dc45d89b3e786307e2d0de7af360bc23dea3c9fd7a",
+      "source_filename_local_time": "2026-11-17 223734",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T01:37:35.298668+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C21.png",
+      "asset_sha256": "6f21d08ac80ebbf0b429b747999f7df5a714f7dfee852f2b7e7cec632860f1c6",
+      "asset_bytes": 23951,
+      "width": 687,
+      "height": 448,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE8"
+      ],
+      "index_groups": "E08",
+      "claim": "Consultas posteriores: ASG U2=0, ALB U2=[], VPC U2=0; cobertura limitada a esas consultas.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            0,
+            0,
+            687,
+            18
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            9,
+            6,
+            50,
+            23
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            0,
+            0,
+            687,
+            24
+          ],
+          "reason": "visual_review_followup"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    },
+    {
+      "id": "C22",
+      "source_filename": "Captura de pantalla 2026-11-17 224826.png",
+      "source_root_alias": "external_screenshots",
+      "source_sha256": "167c28e0c57f6be2a84bbb15cd638ad5bac4f3ec0e3913d0251d3b989bcf352f",
+      "source_filename_local_time": "2026-11-17 224826",
+      "source_time_status": "Nombre local, no prueba independiente de fecha/hora UTC",
+      "source_filesystem_mtime_utc": "2026-11-18T01:48:27.181480+00:00",
+      "visible_utc": null,
+      "asset_path": "assets/C22.png",
+      "asset_sha256": "2919ec7af7e8c220522ff79bb5f3ae994ade2ec5090fc878c230c2341e149ac7",
+      "asset_bytes": 41441,
+      "width": 1021,
+      "height": 278,
+      "selected_for_pdf": true,
+      "criteria": [
+        "CE8"
+      ],
+      "index_groups": "E10",
+      "claim": "GitHub Actions: U2 controls #4 para dc0f4a0 y #5 para PR #3 verdes; también control U1 #17. No prueba merge.",
+      "type": "historical_real_capture",
+      "redactions": [
+        {
+          "box_xyxy": [
+            361,
+            97,
+            424,
+            113
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            361,
+            160,
+            424,
+            177
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            376,
+            252,
+            435,
+            270
+          ],
+          "reason": "privacy_manual_review"
+        },
+        {
+          "box_xyxy": [
+            360,
+            100,
+            416,
+            113
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            392,
+            165,
+            448,
+            178
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        },
+        {
+          "box_xyxy": [
+            376,
+            254,
+            432,
+            267
+          ],
+          "reason": "local_ocr_identifier_candidate"
+        }
+      ],
+      "method": "Deterministic opaque black rectangles on RGB pixels, PNG re-encoding without metadata; no generation or content replacement"
+    }
+  ],
+  "review": "All 22 sanitized copies visually reviewed; follow-up opaque masks applied where OCR missed identifiers. No originals modified.",
+  "verification": {
+    "originals_unchanged": 22,
+    "derivatives_visually_reviewed": 22,
+    "outside_mask_pixels_identical": 22,
+    "no_png_metadata": 22,
+    "local_ocr_sensitive_candidates_remaining": 0,
+    "scope": "Checks support review, not a guarantee against every possible sensitivity."
+  }
+}

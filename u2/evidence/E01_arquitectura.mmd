@@ -1,0 +1,102 @@
+%% NexoAndes U2. Fuente: Terraform local, no la imagen anterior.
+%% X=8/a008/c50 de u2/identity.tfvars; c50 es equivalencia asumida con sección 50.
+%% AWS parámetros de u2/aws/deployment.tfvars; Azure no tiene destino real configurado.
+%% Los nodos de EC2 son instancias dinámicas del ASG, no recursos aws_instance adicionales.
+%% Su posición en A/B ilustra distribución permitida: el código no fija una instancia por AZ.
+%% No se dibujan IP asignadas, IDs, costos ni recursos que no estén en el código.
+flowchart TB
+    TITLE["NexoAndes U2 · a008 · c50 · X=8<br/>Arquitectura de código y estado histórico; no consulta cloud actual"]
+
+    subgraph AWS["AWS · desplegado históricamente y posteriormente eliminado"]
+        direction TB
+        AWS_CLIENT["Cliente HTTP autorizado<br/>CIDR parametrizados; no IP actual certificada"]
+        subgraph VPC["aws_vpc.portal · 10.8.0.0/16 · us-east-1"]
+            direction TB
+            ALB["aws_lb.portal<br/>ALB público; endpoint DNS del ALB"]
+            LISTENER["aws_lb_listener.http<br/>HTTP :80 · forward al Target Group"]
+            TG["aws_lb_target_group.portal<br/>instance · HTTP :80<br/>Health check /health: 200; 15 s; timeout 5 s"]
+            subgraph SUB_A["aws_subnet.public[0] · 10.8.10.0/24 · us-east-1a"]
+                EC2_A["EC2 dinámica del ASG<br/>t3.micro · Portal v1<br/>Posición ilustrativa, no asignación fija por AZ"]
+            end
+            subgraph SUB_B["aws_subnet.public[1] · 10.8.20.0/24 · us-east-1b"]
+                EC2_B["EC2 dinámica del ASG<br/>t3.micro · Portal v1<br/>Posición ilustrativa, no asignación fija por AZ"]
+            end
+            ASG["aws_autoscaling_group.portal<br/>min=2 · desired=2 · max configurado=3<br/>Sin políticas de autoescalamiento dinámico"]
+            LT["aws_launch_template.portal<br/>IMDSv2 obligatorio · bootstrap U2 base64<br/>EBS gp3 cifrado 8 GiB · /dev/sda1<br/>IPv4 pública solicitada para salida por IGW"]
+            SG_ALB["aws_security_group.alb<br/>Entrada TCP/80 desde CIDR autorizados<br/>Salida TCP/80 hacia SG EC2"]
+            SG_EC2["aws_security_group.ec2<br/>Entrada TCP/80 solo desde SG ALB<br/>Salida TCP/80,443 a 0.0.0.0/0 · sin SSH"]
+            RT["aws_route_table.public<br/>Una tabla compartida por A y B"]
+            ROUTE["aws_route.internet<br/>Destino 0.0.0.0/0"]
+            IGW["aws_internet_gateway.portal<br/>Adjunto a esta VPC"]
+
+            ALB -->|"HTTP :80"| LISTENER
+            LISTENER -->|"forward HTTP :80"| TG
+            TG -->|"HTTP :80 /health y Portal"| EC2_A
+            TG -->|"HTTP :80 /health y Portal"| EC2_B
+            ALB ---|"asociación a subnet"| SUB_A
+            ALB ---|"asociación a subnet"| SUB_B
+            RT ---|"aws_route_table_association.public[0]"| SUB_A
+            RT ---|"aws_route_table_association.public[1]"| SUB_B
+            RT ---|"route_table_id"| ROUTE
+            ROUTE ---|"gateway_id"| IGW
+            SG_ALB ---|"security_groups del ALB"| ALB
+            SG_ALB ---|"reglas TCP/80 con referencia entre SG"| SG_EC2
+            SG_EC2 ---|"security_groups de la NIC en LT"| LT
+            LT ==>|"versión numérica en launch_template"| ASG
+            ASG ==>|"gestiona ciclo de vida"| EC2_A
+            ASG ==>|"gestiona ciclo de vida"| EC2_B
+            ASG ---|"vpc_zone_identifier"| SUB_A
+            ASG ---|"vpc_zone_identifier"| SUB_B
+            ASG ---|"target_group_arns; registro de instancias"| TG
+        end
+        AWS_CLIENT -->|"HTTP :80 al DNS del ALB"| ALB
+        AWS_NOTE["INC-U2-001: StartInstanceRefresh denegado por SCP<br/>No se acredita reemplazo v1→v2 ni rollback funcional v2→v1<br/>/health prueba proceso; no demuestra continuidad<br/>max=3 es configuración, no garantía ante todo evento"]
+        ASG -.->|"nota de alcance, no operación"| AWS_NOTE
+    end
+
+    subgraph AZURE["Azure · solo código, no desplegado · excepción S6 informada por el usuario"]
+        direction TB
+        AZ_CLIENT["Cliente HTTP autorizado<br/>Flujo definido en código; no HTTP observado"]
+        subgraph RG["azurerm_resource_group.portal · destino Azure pendiente"]
+            direction TB
+            subgraph VNET["azurerm_virtual_network.portal · 172.20.8.0/24"]
+                subgraph SUB_AZ["azurerm_subnet.portal · 172.20.8.0/26"]
+                    AZ_SUBNET_NOTE["default_outbound_access_enabled=false<br/>La NIC referencia esta subnet"]
+                end
+            end
+            PIP["azurerm_public_ip.portal<br/>Standard · Static · IPv4<br/>Valor no asignado: no despliegue"]
+            NIC["azurerm_network_interface.portal<br/>IP privada Dynamic dentro de la subnet"]
+            NSG["azurerm_network_security_group.portal<br/>HTTP :80 desde CIDR autorizados<br/>Deny del resto de entrada; sin SSH<br/>Egreso NSG predeterminado"]
+            VM["azurerm_linux_virtual_machine.portal<br/>Linux · Portal siempre v1<br/>custom_data base64 · sin contraseña<br/>Clave pública administrativa como input<br/>Disco OS administrado en os_disk"]
+
+            PIP -->|"HTTP :80 propuesto"| NIC
+            NIC -->|"HTTP :80 propuesto"| VM
+            NIC ---|"ip_configuration.subnet_id"| SUB_AZ
+            NIC ---|"ip_configuration.public_ip_address_id"| PIP
+            NSG ---|"network_interface_security_group_association; no subnet"| NIC
+            VM ---|"network_interface_ids"| NIC
+        end
+        AZ_CLIENT -->|"HTTP :80 propuesto"| PIP
+        AZ_NOTE["Imagen exacta, ubicación, tamaño, suscripción y tenant pendientes<br/>La VM no se sitúa dentro de VNet como contenedor ARM:<br/>su relación de red es mediante NIC y subnet<br/>No hay conexión AWS↔Azure implementada"]
+        VM -.->|"nota de alcance, no recurso"| AZ_NOTE
+    end
+
+    subgraph KEY["Leyenda · contornos = pertenencia; subredes pertenecen a VPC/VNet, no al ASG"]
+        K_HTTP_A["Origen"] -->|"Tráfico HTTP"| K_HTTP_B["Destino"]
+        K_REL_A["Recurso"] ---|"Referencia / asociación; no tráfico"| K_REL_B["Recurso"]
+        K_MGT_A["Control de cómputo"] ==>|"Gestión / aprovisionamiento"| K_MGT_B["Instancia / ASG"]
+        K_NOTE_A["Elemento"] -.->|"Anotación, no recurso ni evidencia"| K_NOTE_B["Límite"]
+    end
+
+    TITLE -.->|"alcance histórico"| AWS
+    TITLE -.->|"alcance de código"| AZURE
+    TITLE -.->|"convenciones gráficas"| KEY
+
+    classDef awsResource fill:#fff3e6,stroke:#bd6000,color:#172a3a
+    classDef azureResource fill:#eaf5ff,stroke:#0078b8,color:#172a3a
+    classDef note fill:#fffbe6,stroke:#9b7b00,color:#333333
+    classDef client fill:#f2f4f7,stroke:#64748b,color:#172a3a
+    class ALB,LISTENER,TG,EC2_A,EC2_B,ASG,LT,SG_ALB,SG_EC2,RT,ROUTE,IGW awsResource
+    class PIP,NIC,NSG,VM azureResource
+    class TITLE,AWS_NOTE,AZ_NOTE,AZ_SUBNET_NOTE note
+    class AWS_CLIENT,AZ_CLIENT client

@@ -1,0 +1,82 @@
+name: U2 offline Terraform controls
+
+on:
+  push:
+    paths:
+      - 'u2/**'
+      - '.github/workflows/u2-ci.yml'
+  pull_request:
+    paths:
+      - 'u2/**'
+      - '.github/workflows/u2-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: u2-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    name: Offline ${{ matrix.root }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        root: ['u2', 'u2/aws', 'u2/azure']
+    env:
+      TF_IN_AUTOMATION: 'true'
+      TF_INPUT: 'false'
+      CHECKPOINT_DISABLE: '1'
+      AWS_EC2_METADATA_DISABLED: 'true'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Install U2 guard dependencies
+        run: python -m pip install -r u2/requirements-ci.txt
+      - name: Guard root and all test entry points before initialization
+        env:
+          U2_ROOT: ${{ matrix.root }}
+        run: python -B u2/scripts/check_ci_safety.py "$U2_ROOT"
+      - name: Format check (no rewriting)
+        env:
+          U2_ROOT: ${{ matrix.root }}
+        run: terraform -chdir="$U2_ROOT" fmt -check -diff -recursive
+      - name: Initialize local metadata only, preserve dependency locks
+        env:
+          U2_ROOT: ${{ matrix.root }}
+        run: |
+          terraform -chdir="$U2_ROOT" init -backend=false -input=false -lockfile=readonly -no-color
+          git diff --exit-code -- u2/aws/.terraform.lock.hcl u2/azure/.terraform.lock.hcl
+      - name: Validate and test without external networking
+        env:
+          U2_ROOT: ${{ matrix.root }}
+        run: |
+          set -euo pipefail
+          tf_bin="$(command -v terraform)"
+          py_bin="$(command -v python)"
+          # Every command is preflighted in the SAME namespace in which it executes.
+          offline() {
+            bash u2/scripts/run_offline_linux.sh "$py_bin" "$@"
+          }
+          offline "$py_bin" -B u2/scripts/check_ci_safety.py "$U2_ROOT"
+          offline "$tf_bin" -chdir="$U2_ROOT" validate -no-color
+          if [ "$U2_ROOT" = 'u2' ]; then
+            # Explicit observation suite, including virtual 5-second timeouts.
+            offline "$py_bin" -B -m unittest discover -s u2/tests -p 'test_observation*.py' -v
+            offline "$py_bin" -B -m unittest discover -s u2/tests -p 'test_*.py' -v
+          elif [ "$U2_ROOT" = 'u2/azure' ]; then
+            offline "$py_bin" -B u2/azure/tests/check_offline.py
+          fi
+          offline "$tf_bin" -chdir="$U2_ROOT" test -no-color
